@@ -126,8 +126,8 @@ public:
 
   // Abstract functions that must be implemented in a child class
   virtual double dChi (double x) = 0;
-  virtual double chi (double x) = 0;
-  virtual double chi (double x, int PathNo) = 0;
+  virtual double chi (double x);
+  virtual double chi (double x, int PathNo);
   virtual FFData getDChiPath (int PathNo) = 0;
 
   // Public GET Routines
@@ -177,7 +177,7 @@ protected:
   vector<double> fkMin, fkMax, fdK, frMin, frMax, fdR;  // Fourier filter parameters
   double fqMin, fqMax;  // Fit range for back-transformed (q-space) data
   int fourierFilter (vector <double> kMin, vector <double> kMax, vector <double> dK,
-    vector <double> rMin, vector <double> rMax, vector <double> dR, vector <Coordinate> &Data,FFData &Data2);
+    vector <double> rMin, vector <double> rMax, vector <double> dR, vector <Coordinate> &Data,FFData &Data);
   bool SpectrumReady;  
   bool UseFourierFilter;
   int saveData (const char *Filename, vector<Coordinate> Data);

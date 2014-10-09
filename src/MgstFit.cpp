@@ -18,32 +18,31 @@
 //
 // The code may be compiled using 'make'. Just enter any one of the following:
 //
-//  > make          Makes both the GSL and Minuit versions of FitChi
-//  > make gsl      Makes only the GSL version of FitChi
-//  > make minuit   Makes only the Minuit version of FitChi
-//  > make clean    Run after calling any of the above to remove sre obj files
+//  > make           Makes the standard version of DEXA
+//  > make minuit    The same as above.
+//  > make gsl       Makes the GSL version of DEXA. This is depricated.
+//  > make clean     Run after calling any of the above to remove sre obj files
 //
-// Alternatively, in the absence of 'make', the following commands can be used
-// For the GSL Scaled Levenberg-Marquart back-end, enter:
+// -----------------------------------------------------------------------------
+// MgstFit.cpp: The program execution starts in this file with main(). It simply
+// parses the command line parameters and then invokes readScript() in 
+// ScriptReader.cpp so as to read the DEXA input script. If bad command line 
+// parameters are found, some help text is displayed on the command line.
 //
-//   g++ MgstSpectrum.cpp DiffXasSpectrum.cpp MgstTensor.cpp PathFinder.cpp MgstFcnGsl.cpp MgstFitGsl.cpp spectrum.cpp -lgsl -lgslcblas
-//     
-// And for the Minuit MiGrad back-end, enter:
-//
-//   g++ MgstSpectrum.cpp DiffXasSpectrum.cpp MgstTensor.cpp PathFinder.cpp MgstFcnMinuit.cpp MgstFitMinuit.cpp spectrum.cpp -lgsl -lgslcblas -llcg_Minuit
-
 #include "ScriptReader.h"
 #include <vector>
-#include <cstring>
 
 #define MIN_CMD_LINE_PARAMS 2   // i.e. the binary plus one argument
 #define MAX_CMD_LINE_PARAMS 3   // i.e. the above plus a verbose switch
 
-#define SCRIPT_ARG  1
-#define VERBOSE_ARG 2
+#define SCRIPT_ARG  1 // The script is the first argument
+#define VERBOSE_ARG 2 // The verbose option is the second argument
 
-#define VERSION_TAG "dexa 1.0.1"
+#define VERSION_TAG "dexa 1.0.2"
 
+//------------------------------------------------------------------------------
+// printHelp () : Prints some syntax help to the standard output.
+//
 void printHelp () {
   cout << "Syntax:\n\
   dexa <input script> [OPTIONS]...\n\n\
@@ -64,7 +63,9 @@ See \"http://sourceforge.net/projects/dexa\" for more information.\n" << endl;
                 -v3 : Provides all the above plus debugging information.\n\n";
 }
   
-
+//------------------------------------------------------------------------------
+// main () : Parses the command line parameters and then calls the script reader
+//
 int main (int argc, char* argv[]) {
   std::vector <struct spectrum> theSpectra;
   int Verbose = MIN_VERBOSE;

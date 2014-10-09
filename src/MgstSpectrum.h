@@ -60,8 +60,6 @@ public:
 
   // Local declarations of DiffXasSpectrum abstract base functions
   double dChi (double x);
-  double chi (double x);
-  double chi (double x, int PathNo);
   FFData getDChiPath (int PathNo);
   
   int copySpectrum (MgstSpectrum Input);
@@ -132,7 +130,7 @@ public:
 private:
   void calculateMagnetostriction ();
   void calculateDChi ();
-  vector <Coordinate> doDChiCalculation (vector <DeltaS> &dSIn, vector <Coordinate> XCoords);
+  vector <Coordinate> doDChiCalculation (vector <DeltaS> &dSIn, vector <Coordinate> XCoords = 0);
   Coordinate doDChiCalculation1 (vector <DeltaS> &dSIn, double k);
   static double dChiChebFunction (double k, void *p);
   int rotateVector (Coordinate &theVector, double x, double y, double z);

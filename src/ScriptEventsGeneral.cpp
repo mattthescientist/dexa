@@ -16,6 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with DEXA.  If not, see <http://www.gnu.org/licenses/>.
 //
+//------------------------------------------------------------------------------
+// ScriptEventsGeneral.cpp : Contains all the handler functions for DEXA script
+// commands that are common to both the Minuit and GSL versions of the program.
+// Some of these functions are not required when the tensor calculations are 
+// removed for analysing amorphous samples. In this case, ScriptReader.h defines
+// MGST_AMORPHOUS. Compiler preprocessor directives are then used to detect this
+// and omit the unneeded routines.
+//
+
 #include "ScriptReader.h"
 #include <iostream>
 #include <sstream>
@@ -23,17 +32,20 @@
 #include <string>
 #include <vector>
 
+// File name sufficies
 #define K_SUFFIX "_KSpace"
 #define R_SUFFIX "_RSpace"
 #define Q_SUFFIX "_QSpace"
 
 //------------------------------------------------------------------------------
 // GLOBAL Command List
+// These commands affect the DEXA fitting environment as a whole.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Command : create <spectrum name>
 // Creates a magnetostriction spectrum object with the specified <spectrum name>
+// This is then pushed onto the end of the Spectra vector.
 //
 int create (stringstream &args, vector<struct spectrum> &Spectra) {
   struct spectrum NewSpectrum;
@@ -49,7 +61,10 @@ int create (stringstream &args, vector<struct spectrum> &Spectra) {
   return SCRIPT_BAD_ARGS;
 }
 
-
+//------------------------------------------------------------------------------
+// Command : saveparams <file name>
+// Saves the current values of all the DEXA fit parameters to the file specified
+// at arg1.
 int saveparams (stringstream &args, vector<struct spectrum> &Spectra) {
   string Filename;
   int ErrNo, Verbose;
@@ -72,7 +87,7 @@ int saveparams (stringstream &args, vector<struct spectrum> &Spectra) {
 
 //------------------------------------------------------------------------------
 // Command : preforientation <x> <y> <z>
-// Sets the preferential orientation of the crystallites within the polycrystal
+// Sets the preferential orientation of the crystallites within a polycrystal
 // sample. <x>, <y>, and <z> must combine to form a unit vector that points in a
 // given direction with respect to the beamline frame i.e. +x is horizontally
 // towards the machine, +y is up, and +z is along the direction of beam 
@@ -176,7 +191,12 @@ int polarisation (stringstream &args, vector<struct spectrum> &Spectra) {
 
 //------------------------------------------------------------------------------
 // Command : numavesteps <steps>
-// 
+// Sets the number of individual orientations to be used when averaging the
+// magnetostriction about a defined preferential axis. A larger number will give
+// a more accurate average but at the expense of a longer calculation time. This
+// function is not needed in the tensor-free version of the code and is
+// therefore omitted by the compiler preporocessor.
+//
 int numavesteps (stringstream &args, vector<struct spectrum> &Spectra) {
   int Steps, err, Verbose;
   
@@ -210,6 +230,9 @@ int numavesteps (stringstream &args, vector<struct spectrum> &Spectra) {
 
 //------------------------------------------------------------------------------
 // SPECTRUM Command List
+// These commands affect only a specified spectrum object. The readScript()
+// function in ScriptReader.cpp will pass the name of the spectrum to each of
+// these handler functions at the end of the list of arguments.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -286,7 +309,10 @@ int pathsdat (stringstream &args, vector<structure> &Structures) {
 // Loads the experimental DiffXAS spectrum in <filename> into the specified
 // spectrum object. The first <header> lines of the file are discarded, and then
 // x-axis data (energy/k-space etc.) is loaded from the column <x col>, and the
-// dChi data from <y col>.
+// dChi data from <y col>. If the specified spectrum is divided into sub-
+// structures (each of which will have their own MgstSpectrum object in the
+// code), the data will be copied to all structures using the MgstSpectrum
+// copySpectrum () function.
 //
 int spectrum (stringstream &args, vector<structure> &Structures) {
   string ExpSpectrum, SpectrumName;
@@ -416,14 +442,12 @@ int savespectrum (stringstream &args, vector<structure> &Structures) {
     // Save the full, optimised theory DiffXAS (sum over paths and structures)
     // This is only needed if there is more than one sub-structure as otherwise
     // the full spectrum will just be the first structure component saved above.
-    if (Structures.size () > 1) {
-      ofstream OutputFile (Filename.c_str(), ios::out);
-      for (i = 0; i < TotalDiffXas.size (); i ++) {
-        OutputFile << showpos << scientific << TotalDiffXas[i].x 
-          << '\t' << TotalDiffXas[i].y << endl;
-      }
-      OutputFile.close ();
+    ofstream OutputFile (Filename.c_str(), ios::out);
+    for (i = 0; i < TotalDiffXas.size (); i ++) {
+      OutputFile << showpos << scientific << TotalDiffXas[i].x 
+        << '\t' << TotalDiffXas[i].y << endl;
     }
+    OutputFile.close ();
 
     // If the Fourier filter is being used, save the intermediate filter files.
     if (Structures[0].Spectrum.usingFourierFilter ()) {
@@ -453,16 +477,6 @@ int savespectrum (stringstream &args, vector<structure> &Structures) {
         }
         RFile.close ();
       }
-
-      // Save the Q-space data
-//      oss.clear(); oss.str("");
-//      oss << Filename << Q_SUFFIX;
-//      ofstream QFile (oss.str().c_str(), ios::out);
-//      for (i = 0; i < TotalQData.size (); i ++) {
-//        QFile << showpos << scientific << TotalQData[i].x 
-//          << '\t' << TotalQData[i].y << endl;
-//      }
-//      QFile.close ();
     }
     return SCRIPT_NO_ERROR;
   }
@@ -598,15 +612,6 @@ int saveexperiment (stringstream &args, vector<structure> &Structures) {
         }
         RFile.close ();
       }
-
-      // Save the Q-space data
-//      oss.clear(); oss.str("");
-//      oss << Filename << Q_SUFFIX;
-//      ofstream QFile (oss.str().c_str(), ios::out);
-//      for (unsigned int i = 0; i < QData.size (); i ++) {
-//        QFile << showpos << scientific << QData[i].x << '\t' << QData[i].y <<endl;
-//      }
-//      QFile.close ();
     }    
     return SCRIPT_NO_ERROR;
   }

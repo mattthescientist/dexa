@@ -85,8 +85,7 @@
 //
 void MgstSpectrum::calculateDChi () {
 
-  vector <Coordinate> temp;
-  vector <Coordinate> dChi = doDChiCalculation (dS, temp);
+  vector <Coordinate> dChi = doDChiCalculation (dS);
 
   // The entire dChi(k) spectrum now exists in dChi. Now do the post-processing.
   // First, in order to obtain FT R-space data on the same scale as the
@@ -344,60 +343,6 @@ double MgstSpectrum::dChi (double k) {
   // Then obtain dChi(k) from the dChiCheb Chebyshev
   if (((k * k * 3.81) - dE()) / 3.81 - pow(dK(),2) <= 0.0) return 0.0;
   return gsl_cheb_eval (dChiCheb, k);
-}
-
-
-//------------------------------------------------------------------------------
-// chi (double) : Calculates the standard EXAFS fine-structure function. chi 
-// (double, int) is called to obtain the individual contributions from each
-// scattering path, which are then summed here to give the total chi.
-//
-double MgstSpectrum::chi (double kIn) {
-
-  double Chi = 0.0;
-  for (unsigned int j = 0; j < ScatteringPaths.size (); j ++) {
-    Chi += chi (kIn, j);
-  }
-  return Chi;
-}
-
-
-//------------------------------------------------------------------------------
-// chi (double, int) : Calculates the standard EXAFS fine-structure contribution
-// at k Ang^-1 for scattering path PathNo. The calculation is based upon eqn 3
-// in "EXAFS analysis using FEFF and FEFFIT" by Matthew Newville, J. Synchrotron
-// Rad. 8 (2001) 96-100, but where contributions from the third and fourth
-// cumulants have been neglected.
-//
-double MgstSpectrum::chi (double kIn, int PathNo) {
-
-  // First make sure that all the strains have been calculated. If
-  // they haven't, or need updating, call 'contractPaths' to do that.
-  if (!SpectrumReady) {
-    calculateMagnetostriction ();
-    SpectrumReady = true;
-  }
-  
-  // Now calculate the EXAFS at k by summing contributions over each path j
-  double chi = 0.0;
-  double A, P,Phi, Sig2, S, k, dR;
-
-  k = pow(((kIn * kIn * 3.81) - dE()) / 3.81, 0.5);
-  k = k + dK();
-  
-  int j = PathNo;
-  A    = gsl_cheb_eval (ScatteringPaths[j].ACheb, k) * ScatteringPaths[j].S02;
-  P    = gsl_cheb_eval (ScatteringPaths[j].PCheb, k);
-  Phi  = gsl_cheb_eval (ScatteringPaths[j].PhiCheb, k);
-  Sig2 = ScatteringPaths[j].Sig2;
-  S    = ScatteringPaths[j].S;
-  dR   = ScatteringPaths[j].dR;
-
-  A = A * pow (S * 0.5, 2) / pow ((S * 0.5) + dR, 2);
-
-  chi += A * sin((S * k) + Phi + (2.0 * P * dR) - (8.0 * P * Sig2 / S))
-    * exp (-2.0 * P * P * Sig2);
-  return chi;
 }
 
 

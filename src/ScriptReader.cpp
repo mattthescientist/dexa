@@ -74,7 +74,7 @@ int printParams (ostream &Stream, vector<struct spectrum> &Spectra) {
 //------------------------------------------------------------------------------
 // findSpectrum (string, vector<struct spectrum> &) : Given a vector of spectrum
 // objects, this function will compare the spectrum names against the input Name
-// and return the vector index of the corresponding match if found. If Name does
+// and return the vector index of the corresponding match,if found. If Name does
 // not exist in the vector, SCRIPT_SPECTRUM_NOT_FOUND is returned instead.
 //
 int findSpectrum (string Name, vector<struct spectrum> &Spectra) {
@@ -88,7 +88,10 @@ int findSpectrum (string Name, vector<struct spectrum> &Spectra) {
 }
 
 //------------------------------------------------------------------------------
-// findStructure (string, vector<struct spectrum> &) 
+// findStructure (string, vector<struct spectrum> &) : Given a vector of
+// sub-structures, this function will compare the structure names against the
+// input Name. If this name is found, the index of that structure in the vector
+// is returned. Failing that, SCRIPT_STRUCTURE_NOT_FOUND is returned.
 //
 int findStructure (string Name, vector<structure> &Structures) {
   for (unsigned int i = 0; i < Structures.size (); i ++) {
@@ -103,10 +106,10 @@ int findStructure (string Name, vector<structure> &Structures) {
 //------------------------------------------------------------------------------
 // readScript (const char*, vector <struct spectrum>) : This function starts the
 // script reading process. The vector Spectra, passed in by reference, should be
-// empty and will be filled with the spectra loaded from the input script given
+// empty. It will be filled with the spectra loaded from the input script given
 // by Filename.
 //
-// The list of valid script commands is obtained from Commands, which can be
+// The list of valid script commands is obtained from 'Commands', which can be
 // found in ScriptReader.h. For each command, this array holds a function 
 // pointer. For every command that is read, this associated function is called,
 // with the aim of actually executing the operations required by the command.
