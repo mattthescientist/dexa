@@ -84,6 +84,7 @@ DiffXasSpectrum::DiffXasSpectrum () {
   
   // Disable Fourier filter
   UseFourierFilter = false;
+  SpectrumReady = false;
 }
 
 
@@ -97,6 +98,17 @@ DiffXasSpectrum::~DiffXasSpectrum () {
     gsl_cheb_free (ScatteringPaths[i].PCheb);
     ScatteringPaths.clear ();
   }
+}
+
+int DiffXasSpectrum::dSig2 (int Shell, double NewdSig2) {
+	if (Shell < (int)ScatteringPaths.size()) {
+		ScatteringPaths[Shell].dSig2 = NewdSig2; SpectrumReady = false;
+		return 0;
+	} else {
+		cout << "Error: The path index for dSig2 must be between 0 and "
+		  << ScatteringPaths.size () << ", but you specified " << Shell << endl;
+		return 1;
+	}
 }
 
 
@@ -144,7 +156,7 @@ int DiffXasSpectrum::loadSpectrum (
   }
 
   // Read the data and store the required components for X and Y
-  // The data is assummed to be in k-space.
+  // The data is assumed to be in k-space.
   DataPoints.clear ();
   while (!SpectrumFile.eof ()) {
     getline (SpectrumFile, theString);
@@ -168,7 +180,7 @@ int DiffXasSpectrum::loadSpectrum (
   // required for the FFT. See the description of resample() for details on how
   // this is done. The spacing between data points is the final argument of
   // resample () and is selected so that the maximum signal frequency in the
-  // resampled spectrum is that corresponding to an effective photoelctron
+  // resampled spectrum is that corresponding to an effective photoelectron
   // scattering radius of MAX_RADIUS.
   if (Verbose >= DX_MIN_VERBOSE)
     cout << "...Resampling spectrum to constant k steps" << endl;
@@ -202,7 +214,7 @@ int DiffXasSpectrum::loadSpectrum (
   //      be that between the last two data points.
   //
   //   3. Correct for intrinsic noise averaging that takes place when 
-  //      resampling the spectrum into constant steps in k-space. In essance,
+  //      resampling the spectrum into constant steps in k-space. In essence,
   //      this means dividing by the number of raw data points that were
   //      averaged in order to obtain each resampled point. This is a fn of k:
   //
@@ -490,7 +502,7 @@ int DiffXasSpectrum::saveTheory (const char *Filename, vector<Coordinate> &DiffX
   vector < vector <Coordinate> > AllKData;
   vector < vector <Coordinate> > AllRData;
   vector < vector <Coordinate> > AllQData;
-  cout << "SaveTheory" << endl;
+  //cout << "SaveTheory" << endl;
   FFData PathData = getDChiPath (0);
   
   AllKData.push_back (getTheoryKData ());
@@ -498,7 +510,7 @@ int DiffXasSpectrum::saveTheory (const char *Filename, vector<Coordinate> &DiffX
   AllQData.push_back (getTheoryQData ());
   DiffXas = AllQData[0];
   for (unsigned int j = 0; j < ScatteringPaths.size (); j ++) {
-    cout << j << "/" << ScatteringPaths.size() << " :     " << flush;
+    //cout << j << "/" << ScatteringPaths.size() << " :     " << flush;
     PathData = getDChiPath (j);
     AllKData.push_back (PathData.KData);
     AllRData.push_back (PathData.RData);
@@ -661,6 +673,7 @@ double DiffXasSpectrum::amplitudeFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }
 
 
@@ -694,6 +707,7 @@ double DiffXasSpectrum::phaseFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }
 
 
@@ -727,6 +741,7 @@ double DiffXasSpectrum::pFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }
 
 
@@ -760,6 +775,7 @@ double DiffXasSpectrum::lambdaFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }
 
 
@@ -1120,4 +1136,5 @@ double DiffXasSpectrum::SigmaSqrChebFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }

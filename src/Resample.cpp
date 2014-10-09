@@ -18,12 +18,16 @@
 //
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
+#include <vector>
+#include <iostream>
+#include "DiffXasSpectrum.h"
+using namespace::std;
 
 #define SPLINE_ORDER 4  // Cubic spline
 
 //-------------------------------------------------------------------------------
 // resample (vector<double> *, vector<double> *, vector<double> *, double) :
-// Given a set of coordinates sampled at arbirary intervals along the x-axis, 
+// Given a set of coordinates sampled at arbitrary intervals along the x-axis,
 // this function uses GSL's B-spline routines to resample the data with points
 // spaced at equal intervals. This spacing is defined by arg4, and may be used to
 // effectively define the Nyquist frequency for the input signal. All frequencies
@@ -39,12 +43,12 @@ int resample (vector<double> *XCoords,
   size_t NumKnots = 
     int ((XCoords -> at (NumDataPoints - 1) - XCoords -> at(0)) / KnotSpacing);
   size_t NumCoefficients = NumKnots + 2;
-  if (NumDataPoints < NumCoefficients) {
+  /*if (NumDataPoints < NumCoefficients) {
     cout << "ERROR: The experimental spectrum contains too low a density of data points to be resampled prior to noise extraction."
       << endl << "Please increase the sample rate to at least dk=" << KnotSpacing << "(dE=" << KnotSpacing * KnotSpacing * ALPHA << ")."
       << endl << "or recompile DEXA with a lower MAX_RADIUS." << endl;
     return DX_ERROR;
-  }
+  }*/
   size_t i, j;
   double chisq;
   double MinX = XCoords -> at (0);

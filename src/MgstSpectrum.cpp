@@ -53,7 +53,7 @@
 // 'contractPaths' evaluates the mean magnetostrictive strain for each 
 // scattering path based on the assumption that the polycrystals in the sample 
 // are preferentially oriented in some known manner along the line of the beam 
-// and randomly orientated in the plane perpendicular to the beam. It thus works
+// and randomly oriented in the plane perpendicular to the beam. It thus works
 // out the mean strain resulting from a configurational average of the 
 // magnetostriction about the line of the beam. The 'numSteps' property may be 
 // used to change the number of steps at which to evaluate the strains about 
@@ -80,13 +80,13 @@
 // Fourier filtered and a Chebyshev approximation of the function generated and
 // stored for later use by dChi(double) below. Since the Fourier filter must act
 // on an entire spectrum, and with data points spaced evenly in k, a stored
-// Chebyshev is needed to allow dChi to be obtained for any arbirary k, such as
+// Chebyshev is needed to allow dChi to be obtained for any arbitrary k, such as
 // those at which experimental data points exist.
 //
 void MgstSpectrum::calculateDChi () {
 
-  cout << "Calculate DChi" << endl;
-  vector <Coordinate> dChi = doDChiCalculation (dS);
+  vector <Coordinate> temp;
+  vector <Coordinate> dChi = doDChiCalculation (dS, temp);
 
   // The entire dChi(k) spectrum now exists in dChi. Now do the post-processing.
   // First, in order to obtain FT R-space data on the same scale as the
@@ -108,9 +108,9 @@ void MgstSpectrum::calculateDChi () {
   // filtered, the information in TheoryFFData will be comparable with that in
   // ExptFFData.
   fourierFilter (fkMin, fkMax, fdK, frMin, frMax, fdR, dChiSampled, TheoryFFData);
-  for (unsigned int i = 0; i < TheoryFFData.QData.size (); i ++) {
-    cout << "Q " << i << " " << TheoryFFData.QData[i].x << ", " << TheoryFFData.QData[i].y << endl;
-  }
+  //for (unsigned int i = 0; i < TheoryFFData.QData.size (); i ++) {
+    //cout << "Q " << i << " " << TheoryFFData.QData[i].x << ", " << TheoryFFData.QData[i].y << endl;
+  //}
   generateDChiCheb (dChiSampled);  
 }
 
@@ -139,15 +139,15 @@ FFData MgstSpectrum::getDChiPath (int PathNo) {
   for (unsigned int j = 0; j < dS.size (); j ++) {
     if (dS[j].Chip -> Index == ScatteringPaths[PathNo].Index) {
       thePaths.push_back (dS[j]);
-      cout << "DchiPath " << j << " " << PathNo << " " << dS[j].Chip -> Index << endl;
+      //cout << "DchiPath " << j << " " << PathNo << " " << dS[j].Chip -> Index << endl;
     }
   }
 
   // Now obtain dChi for the selected scattering path and filter the result
   vector <Coordinate> dChij = doDChiCalculation (thePaths, getExptKData ());
-  for (unsigned int i = 0; i < dChij.size (); i ++) {
-    cout << PathNo << "  " << dChij[i].x << ", " << dChij[i].y << endl;
-  }
+  //for (unsigned int i = 0; i < dChij.size (); i ++) {
+    //cout << PathNo << "  " << dChij[i].x << ", " << dChij[i].y << endl;
+  //}
   FFData dChijData;
   fourierFilter (fkMin, fkMax, fdK, frMin, frMax, fdR, dChij, dChijData);
   return dChijData;
@@ -260,9 +260,8 @@ Coordinate MgstSpectrum::doDChiCalculation1 (vector <DeltaS> &dSIn, double kIn){
       // magnetisation state, upon declaration.
       //
       double Rj  = S * 0.5;
-      double dRj = dSIn[j].Chip -> dR /*+ dSIn[j].AveMag1*/;
+      double dRj = dSIn[j].Chip -> dR;
       double dSj = dSIn[j].Ave * (S + 2.0 * dRj);
-//      cout << k << "\t" << dSIn[j].Chip -> Index << "\t" << dSj << "\t" << dSIn[j].Ave << "\t" << S << endl;
       double Cj  = A * pow (Rj, 2) * exp (-2.0 * P * P * Sig2 
         + 2.0 * Sig2 / (Lam * Lam) - 2.0 * dRj / Lam + 4.0 * Sig2 / (Rj * Lam));
       double Dj  = pow (dRj + Rj, -2.0);
@@ -281,7 +280,6 @@ Coordinate MgstSpectrum::doDChiCalculation1 (vector <DeltaS> &dSIn, double kIn){
       // Now change the magnetisation to M'' and recalculate the dependent
       // components of the DiffEXAFS function (i.e. Dj and Qj)
       dRj += dSj / 2;
-//      dRj = dSIn[j].Chip -> dR + dSIn[j].AveMag2;
       double Dj2 = pow (dRj + Rj, -2.0);
       double Qj2 = (2.0 * k * Rj) + Phi + (2.0 * P * dRj) - (4 * P * Sig2 / Rj)
         - (4.0 * P * Sig2 / Lam);
@@ -340,6 +338,7 @@ double MgstSpectrum::dChiChebFunction (double k, void *p) {
       UpperPoint = MidPoint;
     }
   } while (true);
+  return 0.0; // Never runs, but stops compiler warnings
 }
 
 
@@ -444,7 +443,7 @@ void MgstSpectrum::calculateMagnetostriction () {
 // contractPaths () : Goes through all the loaded scattering paths, one shell at
 // a time, and calculates the mean dS due to Magnetostriction, by performing an
 // orientational average of sample crystalites about the axis of the beam 
-// propogation direction.
+// propagation direction.
 //
 void MgstSpectrum::contractPaths () {
   vector <DeltaS*> *newdS;
@@ -573,7 +572,7 @@ int MgstSpectrum::prefX (int Orientation, double NewX) {
     PrefOrientations[Orientation].x = NewX;
     return MS_NO_ERROR;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return MS_ERROR; 
   }
 }
@@ -583,7 +582,7 @@ int MgstSpectrum::prefY (int Orientation, double NewY) {
     PrefOrientations[Orientation].y = NewY;
     return MS_NO_ERROR;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return MS_ERROR; 
   }
 }
@@ -592,7 +591,7 @@ int MgstSpectrum::prefZ (int Orientation, double NewZ) {
     PrefOrientations[Orientation].z = NewZ;
     return MS_NO_ERROR;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return MS_ERROR; 
   }
 }
@@ -603,7 +602,7 @@ int MgstSpectrum::prefDeg (int Orientation, double NewDeg) {
     else PrefOrientations[Orientation].Degree = NewDeg;
     return MS_NO_ERROR;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return MS_ERROR; 
   }
 }
@@ -612,7 +611,7 @@ double MgstSpectrum::prefX (int Orientation) {
   if (Orientation >= 0 && Orientation < int(PrefOrientations.size ())) {
     return PrefOrientations[Orientation].x;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return 0.0; 
   }
 }
@@ -620,7 +619,7 @@ double MgstSpectrum::prefY (int Orientation) {
   if (Orientation >= 0 && Orientation < int(PrefOrientations.size ())) {
     return PrefOrientations[Orientation].y;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return 0.0; 
   }
 }
@@ -628,7 +627,7 @@ double MgstSpectrum::prefZ (int Orientation) {
   if (Orientation >= 0 && Orientation < int(PrefOrientations.size ())) {
     return PrefOrientations[Orientation].z;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return 0.0; 
   }
 }
@@ -636,7 +635,7 @@ double MgstSpectrum::prefDeg (int Orientation) {
   if (Orientation >= 0 && Orientation < int(PrefOrientations.size ())) {
     return PrefOrientations[Orientation].Degree;
   } else {
-    cout << "Invalid orienation index: " << Orientation << endl;
+    cout << "Invalid orientation index: " << Orientation << endl;
     return 0.0; 
   }
 }
@@ -677,7 +676,7 @@ void MgstSpectrum::contractLegs (vector <Leg*> *PathLegs, double dSMag1In,
       theLeg.z /= VectorLength;
       
       rotateVector (theLeg, x, y, z);
-      cout << theLeg.x << "," << theLeg.y << "," << theLeg.z << endl;
+      //cout << theLeg.x << "," << theLeg.y << "," << theLeg.z << endl;
       
       // Add the dS for this leg to the total for the path so far. This is done
       // twice - once for each magnetisation direction.
@@ -711,7 +710,7 @@ void MgstSpectrum::contractLegs (vector <Leg*> *PathLegs, double dSMag1In,
       thedS -> Ave = thedS -> AveMag2 - thedS -> AveMag1;
       thedS -> Chip = getPath(Shells[theShell].ChipIndex);
       alldS -> push_back (thedS);
-      cout << dSMag1In << " " << dSMag2In << " " << Pol1 << " " << Pol2 << "      " << thedS -> AveMag1 << "  " << thedS -> AveMag2 << "  " << thedS->Ave << endl;
+      //cout << dSMag1In << " " << dSMag2In << " " << Pol1 << " " << Pol2 << "      " << thedS -> AveMag1 << "  " << thedS -> AveMag2 << "  " << thedS->Ave << endl;
     }
   }
 }
@@ -739,7 +738,7 @@ double MgstSpectrum::contractToTensor (
       for (int k = 0; k < 3; k ++) {
         for (int l = 0; l < 3; l ++) {
           Sum += Tensor [i][j][k][l] * theLeg[i] * theLeg[j] * Mag[k] * Mag[l];
-          cout << i << "," << j << "," << k << "," << l << ": " << Tensor[i][j][k][l] << "  " << theLeg[i] << "  " << theLeg[j] << "  " << Mag[k] << "  " << Mag[l] << "  " << Sum << endl;
+          //cout << i << "," << j << "," << k << "," << l << ": " << Tensor[i][j][k][l] << "  " << theLeg[i] << "  " << theLeg[j] << "  " << Mag[k] << "  " << Mag[l] << "  " << Sum << endl;
         }
       }
     }

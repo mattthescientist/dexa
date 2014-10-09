@@ -132,6 +132,7 @@ void Fourier::getTotalFT (vector<Coordinate> &ComplexFT,
 int Fourier::hannWindow 
   (vector <double> kMin, vector <double> kMax, vector <double> dK, vector <Coordinate> &Data, const char *OutputName) {
   unsigned int i, j;
+  string strOutputName = OutputName;
   
   // First initalise the window. The amplitude at all points is set to zero.
   vector<Coordinate> Window;
@@ -156,13 +157,13 @@ int Fourier::hannWindow
     }
     
     for (i = 0; Data[i].x < kMin[j] - (dK[j] * 0.5) && i < Data.size(); i ++) {}
-    for (i = i; Data[i].x < kMin[j] + (dK[j] * 0.5) && i < Data.size(); i ++) {
+    for (; Data[i].x < kMin[j] + (dK[j] * 0.5) && i < Data.size(); i ++) {
       Window[i].y += 0.5 * (1.0 + sin ((Data[i].x - kMin[j]) / dK[j] * PI));
       }
-    for (i = i; Data[i].x < kMax[j] - (dK[j] * 0.5) && i < Data.size(); i ++) {
+    for (; Data[i].x < kMax[j] - (dK[j] * 0.5) && i < Data.size(); i ++) {
       Window[i].y += 1.0;
     }
-    for (i = i; Data[i].x < kMax[j] + (dK[j] * 0.5) && i < Data.size(); i ++) {
+    for (; Data[i].x < kMax[j] + (dK[j] * 0.5) && i < Data.size(); i ++) {
       Window[i].y += 0.5 * (1.0 - sin ((Data[i].x - kMax[j]) / dK[j] * PI));
     }
   }
@@ -174,7 +175,7 @@ int Fourier::hannWindow
     if (Window[i].y > 1.0) { Window[i].y = 1.0; }
     Data[i].y *= Window[i].y;
   }
-  if (OutputName != "") saveData (OutputName, Window);
+  if (strOutputName != "") saveData (OutputName, Window);
   return DX_NO_ERROR;
 }
 
@@ -195,6 +196,7 @@ int Fourier::hannWindowComplex
   (vector <double> kMin, vector <double> kMax, vector <double> dK, vector <Coordinate> &Data, const char *OutputName) {
   unsigned int i, j;
   unsigned int Len = Data.size () / 2;
+  string strOutputName = OutputName;
   
   // First initalise the window. The amplitude at all points is set to zero.
   vector<Coordinate> Window;
@@ -219,13 +221,13 @@ int Fourier::hannWindowComplex
     }
 
     for (i = 0; Data[i].x < kMin[j] - (dK[j] * 0.5) && i < Len; i ++) {}
-    for (i = i; Data[i].x < kMin[j] + (dK[j] * 0.5) && i < Len; i ++) {
+    for (; Data[i].x < kMin[j] + (dK[j] * 0.5) && i < Len; i ++) {
       Window[i].y += 0.5 * (1.0 + sin ((Data[i].x - kMin[j]) / dK[j] * PI));
       }
-    for (i = i; Data[i].x < kMax[j] - (dK[j] * 0.5) && i < Len; i ++) {
+    for (; Data[i].x < kMax[j] - (dK[j] * 0.5) && i < Len; i ++) {
       Window[i].y += 1.0;
     }
-    for (i = i; Data[i].x < kMax[j] + (dK[j] * 0.5) && i < Len; i ++) {
+    for (; Data[i].x < kMax[j] + (dK[j] * 0.5) && i < Len; i ++) {
       Window[i].y += 0.5 * (1.0 - sin ((Data[i].x - kMax[j]) / dK[j] * PI));
     }
   }
@@ -238,7 +240,7 @@ int Fourier::hannWindowComplex
     Data[i].y *= Window[i].y;
     Data[Len + i].y *= Window[i].y;
   }
-  if (OutputName != "") saveData (OutputName, Window);
+  if (strOutputName != "") saveData (OutputName, Window);
   return DX_NO_ERROR;
 }
 

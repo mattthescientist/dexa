@@ -56,7 +56,7 @@ typedef struct PF_Scatterer {
 typedef struct PF_Leg {
   int Atom;
   std::vector <PF_Leg*> *Next;
-  PF_Leg () { Next = NULL; }
+  PF_Leg () { Next = NULL; Atom = 0; }
 } Leg;
 
 typedef struct PF_Shell {
@@ -66,7 +66,13 @@ typedef struct PF_Shell {
   int Legs;                 // nleg   Number of legs in the scattering path
   int Degeneracy;           // degen  Number of equivalent paths in the shell
   double Radius;            // r      Path Radius (1/2 path length for nleg > 2)
-  PF_Shell () { Scatterers = NULL; }
+  PF_Shell () {
+	  Scatterers = NULL;
+  	  ChipIndex = 0;
+  	  Legs = 0;
+  	  Degeneracy = 0;
+  	  Radius = 0.0;
+  }
 } Shell;
 
 //------------------------------------------------------------------------------
@@ -75,7 +81,7 @@ typedef struct PF_Shell {
 class PathFinder {
 
 public:
-  PathFinder () {};    // Empty default constructor
+  PathFinder () { MaxLegs = 0; MaxR = 0.0; };    // Empty default constructor
   ~PathFinder () {
     for (unsigned int i = 0; i < Shells.size(); i ++) { 
       if (Shells[i].Scatterers != NULL) delete Shells[i].Scatterers;

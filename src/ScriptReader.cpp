@@ -133,7 +133,7 @@ int readScript (const char* Filename, vector <struct spectrum> &Spectra, int Ver
   size_t DelimiterPos;
   int Error;
   int LineNumber = 0;
-  
+
   // Open the specified script file and verify it opened correctly
   ifstream InputScript (Filename, ios::in);
   if (! InputScript.is_open()) {
@@ -157,6 +157,7 @@ int readScript (const char* Filename, vector <struct spectrum> &Spectra, int Ver
     // Get the next line of data and load it into an istringstream for formatted
     // output later on.
     getline (ScriptStream, LineOfData);
+    cout << LineOfData << endl;
     LineNumber ++;
     iss.clear ();
     iss.str (LineOfData);

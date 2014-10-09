@@ -1,4 +1,8 @@
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <gsl/gsl_multifit_nlin.h>
+using namespace::std;
 /* deriv/deriv.c
  *
  * Copyright (C) 2004 Brian Gough

@@ -95,7 +95,11 @@ MgstTensor::MgstTensor () {
   theLambda1A0 = 0.0;
   theLambda2A0 = 0.0;
   theLambda1A2 = 0.0;
+  theLambda1G2 = 0.0;
+  theLambda2G2 = 0.0;
   theLambda2A2 = 0.0;
+  theLambda3G2 = 0.0;
+  theLambda4G2 = 0.0;
   theSymmetry = MT_DEF_SYMMETRY;
   PrefOrientation.x = 0.0; 
   PrefOrientation.y = 0.0; 
@@ -784,7 +788,7 @@ vector < vector <double> > MgstTensor::bondMatrix (
 // DEBUG ROUTINES
 //******************************************************************************
 
-int MgstTensor::saveVoigt (char *Filename) {
+int MgstTensor::saveVoigt (const char *Filename) {
   ofstream VoigtFile (Filename);
   if (! VoigtFile.is_open()) {
     return MT_ERROR;
@@ -801,7 +805,7 @@ int MgstTensor::saveVoigt (char *Filename) {
   return MT_NO_ERROR;
 }
 
-int MgstTensor::saveTensor (char *Filename) {
+int MgstTensor::saveTensor (const char *Filename) {
   ofstream TensorFile (Filename);
   if (! TensorFile.is_open()) {
     return MT_ERROR;
@@ -824,8 +828,10 @@ int MgstTensor::saveTensor (char *Filename) {
 }
 
 int MgstTensor::rotateDebug (double x, double y, double z) {
-  saveVoigt ("debug.voigt1");
-  saveTensor ("debug.tensor1");
+  string debugVoigt = "debug.voigt1";
+  string debugTensor = "debug.tensor1";
+  saveVoigt (debugVoigt.c_str());
+  saveTensor (debugTensor.c_str());
 
   int m, n;
   vector < vector <double> > EulerMatrix = eulerMatrix (x, y, z);

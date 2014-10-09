@@ -51,7 +51,7 @@ OBJ_GSL := $(patsubst %,$(SRC_DIR)/%,$(_OBJ_GSL))
 OBJ_MIN := $(patsubst %,$(SRC_DIR)/%,$(_OBJ_MIN))
 
 # Flags
-C_FLAGS := -I/usr/local/gsl/include -I/usr/local/minuit/include -Wall
+C_FLAGS := -I/usr/local/gsl/include -I/usr/local/minuit/include -Wall -g
 FLAGS_GSL := -L/usr/local/gsl/lib -lgsl -lgslcblas -o $(BIN_GSL)
 FLAGS_MIN := -L/usr/local/gsl/lib -lgsl -lgslcblas -L/usr/local/minuit/lib -static -llcg_Minuit -o $(BIN_MIN)
 

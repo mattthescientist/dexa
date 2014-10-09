@@ -104,8 +104,8 @@ public:
   virtual int prefOrientation (double x, double y, double z);
 
   // Some output routines for debugging purposes
-  int saveVoigt (char *Filename);
-  int saveTensor (char *Filename);
+  int saveVoigt (const char *Filename);
+  int saveTensor (const char *Filename);
   int rotateDebug (double x, double y, double z);
   
 private:

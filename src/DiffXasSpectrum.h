@@ -47,7 +47,7 @@
 #define CHEB_ORDER    200
 #define CHEB_BG_ORDER 3
 
-#define MAX_RADIUS 20 // Angstroms
+#define MAX_RADIUS 17 // Angstroms
 #define ALPHA      3.81
 
 // Debug Output Filenames
@@ -86,7 +86,18 @@ typedef struct DX_ChipFile {
   gsl_cheb_series *PCheb;   // A Chebyshev approximation of P_j(k)
   gsl_cheb_series *LamCheb; // A Chebyshev approximation of Lambda_j(k)
 
-  DX_ChipFile () { /*dS = 0.0; */dSig2 = 0.0; S02 = 1.0; }  
+  DX_ChipFile () {
+	  S02 = 1.0;
+	  Sig2 = 0.0;
+	  S = 0.0;
+	  dR = 0.0;
+	  dSig2 = 0.0;
+	  Index = 0;
+	  ACheb = NULL;
+	  PhiCheb = NULL;
+	  PCheb = NULL;
+  	  LamCheb = NULL;
+  }
 } Path;
 
 typedef struct DX_Coordinate {
@@ -137,7 +148,7 @@ public:
   Path               getPathj (int j)  { return ScatteringPaths[j]; }
   int                numPaths ()       { return ScatteringPaths.size (); }
   virtual double     dK ()             { return thedK; }
-  virtual double     dE ()             { return thedE; }  
+  virtual double     dE ()             { return thedE; }
   virtual double     dSig2 (int Shell) { return ScatteringPaths[Shell].dSig2; }
   double numIndependentPoints ();
   double sigmaSqr (int Point) { return SigmaSqr[Point].y; }
@@ -163,8 +174,7 @@ public:
   // Public SET Routines  
   virtual void dK (double a) { thedK = a; SpectrumReady = false; }
   virtual int dE (double a)  { thedE = a; SpectrumReady = false; return 0; }
-  virtual int dSig2 (int Shell, double NewdSig2)
-    { ScatteringPaths[Shell].dSig2 = NewdSig2; SpectrumReady = false; return 0;}
+  virtual int dSig2 (int Shell, double NewdSig2);
   void setFilter 
     (double kMin, double kMax, double dK, double rMin, double rMax, double dR);
   void setFitRange (double nqMin, double nqMax);
@@ -178,7 +188,7 @@ protected:
   vector<double> fkMin, fkMax, fdK, frMin, frMax, fdR;  // Fourier filter parameters
   double fqMin, fqMax;  // Fit range for back-transformed (q-space) data
   int fourierFilter (vector <double> kMin, vector <double> kMax, vector <double> dK,
-    vector <double> rMin, vector <double> rMax, vector <double> dR, vector <Coordinate> &Data,FFData &Data);
+    vector <double> rMin, vector <double> rMax, vector <double> dR, vector <Coordinate> &Data,FFData &Data2);
   bool SpectrumReady;  
   bool UseFourierFilter;
   int saveData (const char *Filename, vector<Coordinate> Data);

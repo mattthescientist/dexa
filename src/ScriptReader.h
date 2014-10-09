@@ -40,7 +40,7 @@ using namespace::std;
 // General script definitions
 #define SCRIPT_PRECISION           6  // Decimal places for output of parameters
 #define COMMENT_DELIMITER '*'         // Ignore lines where * is the first field
-#define END_OF_FILE       'ÿ'         // Used to prevent reading past EOF
+#define END_OF_FILE       'ï¿½'         // Used to prevent reading past EOF
 #define END_OF_LINE       '\0'        // Used to prevent reading past EOL
 
 #define MGST_TENSOR_SIZE  81
@@ -60,7 +60,7 @@ using namespace::std;
 // and a name for the parameter. When a parameter with a matching name is 
 // identified in the input script, the function pointers are copied from the
 // "const struct parameter Parameters []" array below. All parameters must be in
-// this array or they will not be indentified.
+// this array or they will not be identified.
 //
 // Both structs also contain an int Index, which stores the array index used by
 // the parameter within the solver's (GSL or Minuit) own list of fit parameters.
@@ -293,6 +293,7 @@ const struct parameter Parameters [] = {
   parameter::add ("lambda4G2", &MgstSpectrum::lambda4G2,&MgstSpectrum::lambda4G2),
   parameter::add ("dE",       &MgstSpectrum::dE,       &MgstSpectrum::dE),
   parameter::addPath ("dSig2j", &MgstSpectrum::dSig2,  &MgstSpectrum::dSig2),
+  parameter::addPath ("dS", &MgstSpectrum::DS,      &MgstSpectrum::DS),
   parameter::addPath ("prefX",  &MgstSpectrum::prefX,  &MgstSpectrum::prefX),
   parameter::addPath ("prefY",  &MgstSpectrum::prefY,  &MgstSpectrum::prefY),
   parameter::addPath ("prefZ",  &MgstSpectrum::prefZ,  &MgstSpectrum::prefZ),

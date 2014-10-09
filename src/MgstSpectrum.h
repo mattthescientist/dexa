@@ -29,7 +29,7 @@
 #define DEF_AVE_STEPS 64
 
 // Important: Beamline frame of reference is
-//    +z beam propogation direction,
+//    +z beam propagation direction,
 //    +y from hutch floor vertically up towards ceiling
 //    +x away from the storage ring in direction orthogonal to +z and +y
 
@@ -97,7 +97,8 @@ public:
   virtual int tensorElement (int Element, double NewValue) { MgstTensor::tensorElement (Element, NewValue); SpectrumReady = false; return MS_NO_ERROR; }
   virtual int voigtElement (int Element, double NewValue) { MgstTensor::voigtElement (Element, NewValue); SpectrumReady = false; return MS_NO_ERROR; }
   virtual int halfVoigtElement (int Element, double NewValue) { MgstTensor::halfVoigtElement (Element, NewValue); SpectrumReady = false; return MS_NO_ERROR; }
-       
+  int DS (int Path, double NewValue) { if (Path >= 0 && Path < (int)dS.size ()) { dS [Path].Ave = NewValue; SpectrumReady = false; return MS_NO_ERROR; } else { return MS_ERROR; } }
+
   virtual double lambdaA0 () { return MgstTensor::lambdaA0 (); }
   virtual double lambdaG2 () { return MgstTensor::lambdaG2 (); }
   virtual double lambdaE2 () { return MgstTensor::lambdaE2 (); }
@@ -113,6 +114,7 @@ public:
   virtual double tensorElement (int i) { return MgstTensor::tensorElement (i); }
   virtual double voigtElement (int i) { return MgstTensor::voigtElement (i); }
   virtual double halfVoigtElement (int i) {return MgstTensor::halfVoigtElement (i);}
+  double DS (int i) { return dS[i].Ave; }
   
   // Get and set functions for the preferential orientations. These are of the
   // same basic template as the path property get and set functions and so can
@@ -130,7 +132,7 @@ public:
 private:
   void calculateMagnetostriction ();
   void calculateDChi ();
-  vector <Coordinate> doDChiCalculation (vector <DeltaS> &dSIn, vector <Coordinate> XCoords = 0);
+  vector <Coordinate> doDChiCalculation (vector <DeltaS> &dSIn, vector <Coordinate> XCoords);
   Coordinate doDChiCalculation1 (vector <DeltaS> &dSIn, double k);
   static double dChiChebFunction (double k, void *p);
   int rotateVector (Coordinate &theVector, double x, double y, double z);

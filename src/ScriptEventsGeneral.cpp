@@ -675,12 +675,11 @@ double createParameterArrays (vector<double> &UserParams, vector<double>
   
   double NumIndepPoints = 0.0;
   for (unsigned int i = 0; i < Spectra.size (); i ++) {
-    NumIndepPoints +=Spectra[i].SubStructure[0].Spectrum.numIndependentPoints();
+	NumIndepPoints +=Spectra[i].SubStructure[0].Spectrum.numIndependentPoints();
     for (unsigned int l = 0; l < Spectra[i].SubStructure.size (); l ++) {
       // Deal with parameters that apply to the crystal as a whole first
       for (unsigned int j = 0; j < Spectra[i].SubStructure[l].Crystal.size (); j ++) {
         for (unsigned int k = 0; k < ParamNames.size (); k ++) {
-
           //If a parameter of the same name already exists in the Minuit arrays,
           //link the current parameter to it by assigning the same index. No new
           // array element is created.
@@ -712,6 +711,7 @@ double createParameterArrays (vector<double> &UserParams, vector<double>
       // Now handle the parameters that depend upon specific scattering paths in
       // the same way as those above.
       for (unsigned int j = 0; j < Spectra[i].SubStructure[l].Path.size (); j ++) {
+    	//cout << j << "/" << Spectra[i].SubStructure[l].Path.size () << endl;
         for (unsigned int k = 0; k < ParamNames.size (); k ++) {
           if (Spectra[i].SubStructure[l].Path[j].Name == ParamNames [k]) {
             Spectra[i].SubStructure[l].Path[j].Index = k;
@@ -807,7 +807,10 @@ int setparameter (stringstream &args, structure &Structure) {
   // Try reading an int into the third parameter first, and if that fails, we
   // must be looking at the second condition, so reset stream and read a string
   args >> Parameter >> Value;
-  if (!(args >> Path)) { args.unget(); args.clear(); }
+  args >> Path;
+  if (args.fail()) {
+	  args.unget(); args.clear(); Path = -1;
+  }
   args >> SpectrumName >> Verbose;  
   
   if (args.eof ()) {
@@ -885,10 +888,10 @@ int fitparameter (stringstream &args, structure &Structure) {
     args.clear(); args.seekg (ArgPos, ios::beg); Path = -1;
     args >> MinusLimit >> PlusLimit >> SpectrumName >> Verbose;
     if (args.fail() || !args.eof()) {
-      args.clear(); args.seekg (ArgPos, ios::beg);
+      args.clear(); args.seekg (ArgPos, ios::beg); Path = -1;
       args >> Path >> MinusLimit >> PlusLimit >> SpectrumName >> Verbose;
       if (args.fail()) {       
-        args.clear(); args.seekg (ArgPos, ios::beg);
+        args.clear(); args.seekg (ArgPos, ios::beg); Path = -1;
         args >> SpectrumName >> Verbose;
       }
     }
@@ -1060,23 +1063,23 @@ int fitfullvoigt (stringstream &args, structure &Structure) {
 
 int symmetry (stringstream &args, structure &Structure) {
   string Symmetry, SpectrumName;
-  int Err, Verbose;
+  int Verbose;
   
   args >> Symmetry >> SpectrumName >> Verbose;
   if (args.eof () && !args.fail ()) {
-    if (Symmetry == "cubic") { Err = 
+    if (Symmetry == "cubic") {
       Structure.Spectrum.symmetry (MT_TENSOR_CUBIC); 
     }
-    else if (Symmetry == "isotropic") { Err =
+    else if (Symmetry == "isotropic") {
       Structure.Spectrum.symmetry (MT_TENSOR_ISOTROPIC);
     }
-    else if (Symmetry == "cylindrical") { Err = 
+    else if (Symmetry == "cylindrical") {
       Structure.Spectrum.symmetry (MT_TENSOR_CYLINDRICAL);
     }
-    else if (Symmetry == "tetragonal") { Err = 
+    else if (Symmetry == "tetragonal") {
       Structure.Spectrum.symmetry (MT_TENSOR_TETRAGONAL_T1); 
     }
-    else if (Symmetry == "tetragonal2") { Err = 
+    else if (Symmetry == "tetragonal2") {
       Structure.Spectrum.symmetry (MT_TENSOR_TETRAGONAL_T2); 
     }
     else {

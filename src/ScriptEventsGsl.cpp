@@ -51,15 +51,20 @@ int startfit (stringstream &args, vector<struct spectrum> &Spectra) {
     "========================================================================="
     << endl << "Starting DiffXAS fit with GSL ..." << endl << endl;
   MgstFcn GslFit (&Spectra);
-  
+
   // Prepare the parameter and error arrays for GSL.
   vector<double> UserParams;
   vector<double> ParamErrors;
   vector<double> MinusLimits;
   vector<double> PlusLimits;
   vector<string> ParamNames;
+  if (Verbose >= MAX_VERBOSE) {
+	  cout << "...creating parameter arrays" << endl;
+  }
   createParameterArrays (UserParams, MinusLimits, PlusLimits, ParamErrors, ParamNames, Spectra, Verbose);
-
+  if (Verbose >= MAX_VERBOSE) {
+  	  cout << "...running GslFit ()" << endl;
+  }
   // Execute the fit
   GslFit (UserParams);
   cout << "Fitting Complete" << endl << endl;

@@ -71,7 +71,7 @@ int fitFunction (const gsl_vector *par, void *data, gsl_vector *f)
   }
 
   // Calculate the sum of differences between theory and experiment
-  double Chi = 0.0;
+  //double Chi = 0.0;
   double ChiW = 0.0;
   double ExptPoint;
   unsigned int Point = 0;
@@ -85,7 +85,7 @@ int fitFunction (const gsl_vector *par, void *data, gsl_vector *f)
 
       if (theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) != 0.0) {
         // Note that the GSL difference vector requires Chi rather than Chi^2 !!!
-        Chi = ExptPoint - theDiffEXAFS[j].y;
+        //Chi = ExptPoint - theDiffEXAFS[j].y;
         ChiW = (ExptPoint - theDiffEXAFS[j].y)
           / pow (theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j), 0.5);
 //        cout << ExptPoint << "  " << Point << ": i=" << i << " j=" << j << " sig2=" 

@@ -37,7 +37,7 @@ class MgstFcn : public FCNBase {
 public:
   MgstFcn (vector <struct spectrum> *Spectra) { 
     theSpectra = Spectra; MaxIterations = DEF_MAX_ITERATIONS; 
-    VerboseLevel = MIN_VERBOSE; 
+    VerboseLevel = MIN_VERBOSE; theErrorDef = 0.0;
   }
   ~MgstFcn () {}
   

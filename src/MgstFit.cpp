@@ -29,8 +29,15 @@
 // ScriptReader.cpp so as to read the DEXA input script. If bad command line 
 // parameters are found, some help text is displayed on the command line.
 //
+//   g++ MgstSpectrum.cpp DiffXasSpectrum.cpp MgstTensor.cpp PathFinder.cpp MgstFcnGsl.cpp MgstFitGsl.cpp spectrum.cpp -lgsl -lgslcblas
+//     
+// And for the Minuit MiGrad back-end, enter:
+//
+//   g++ MgstSpectrum.cpp DiffXasSpectrum.cpp MgstTensor.cpp PathFinder.cpp MgstFcnMinuit.cpp MgstFitMinuit.cpp spectrum.cpp -lgsl -lgslcblas -llcg_Minuit
+
 #include "ScriptReader.h"
 #include <vector>
+#include <cstring>
 
 #define MIN_CMD_LINE_PARAMS 2   // i.e. the binary plus one argument
 #define MAX_CMD_LINE_PARAMS 3   // i.e. the above plus a verbose switch
@@ -38,7 +45,7 @@
 #define SCRIPT_ARG  1 // The script is the first argument
 #define VERBOSE_ARG 2 // The verbose option is the second argument
 
-#define VERSION_TAG "dexa 1.0.3"
+#define VERSION_TAG "dexa 1.0.4"
 
 //------------------------------------------------------------------------------
 // printHelp () : Prints some syntax help to the standard output.
