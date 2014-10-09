@@ -40,7 +40,7 @@
 #define FEFF_REAL_P_COL    7
 
 #define EXAFS_MIN_K   0.1  // Angstroms^-1
-#define EXAFS_MAX_K   40.0 // Angstroms^-1
+#define EXAFS_MAX_K   20.0 // Angstroms^-1
 #define EXAFS_K_STEP  0.05 // Angstroms^-1
 
 // GSL Chebyshev constants
@@ -81,9 +81,10 @@ typedef struct DX_ChipFile {
   double dSig2;
   int Index;
 
-  gsl_cheb_series *ACheb;   // A Chebyshev approximation of Aj(k)
-  gsl_cheb_series *PhiCheb; // A Chebyshev approximation of Phij(k)
-  gsl_cheb_series *PCheb;   // A Chebyshev approximation of Pj(k)
+  gsl_cheb_series *ACheb;   // A Chebyshev approximation of A_j(k)
+  gsl_cheb_series *PhiCheb; // A Chebyshev approximation of Phi_j(k)
+  gsl_cheb_series *PCheb;   // A Chebyshev approximation of P_j(k)
+  gsl_cheb_series *LamCheb; // A Chebyshev approximation of Lambda_j(k)
 
   DX_ChipFile () { /*dS = 0.0; */dSig2 = 0.0; S02 = 1.0; }  
 } Path;
@@ -202,6 +203,7 @@ private:
   static double amplitudeFunction (double k, void *params);
   static double phaseFunction (double k, void *params);
   static double pFunction (double k, void *params);
+  static double lambdaFunction (double k, void *params);
   static double exptFunction (double k, void *params);
   static double SigmaSqrChebFunction (double k, void *p);
   int writeTheoryData (string Filename, vector < vector <Coordinate> > &Data);

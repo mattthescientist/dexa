@@ -85,6 +85,7 @@
 //
 void MgstSpectrum::calculateDChi () {
 
+  cout << "Calculate DChi" << endl;
   vector <Coordinate> dChi = doDChiCalculation (dS);
 
   // The entire dChi(k) spectrum now exists in dChi. Now do the post-processing.
@@ -107,6 +108,9 @@ void MgstSpectrum::calculateDChi () {
   // filtered, the information in TheoryFFData will be comparable with that in
   // ExptFFData.
   fourierFilter (fkMin, fkMax, fdK, frMin, frMax, fdR, dChiSampled, TheoryFFData);
+  for (unsigned int i = 0; i < TheoryFFData.QData.size (); i ++) {
+    cout << "Q " << i << " " << TheoryFFData.QData[i].x << ", " << TheoryFFData.QData[i].y << endl;
+  }
   generateDChiCheb (dChiSampled);  
 }
 
@@ -135,11 +139,15 @@ FFData MgstSpectrum::getDChiPath (int PathNo) {
   for (unsigned int j = 0; j < dS.size (); j ++) {
     if (dS[j].Chip -> Index == ScatteringPaths[PathNo].Index) {
       thePaths.push_back (dS[j]);
+      cout << "DchiPath " << j << " " << PathNo << " " << dS[j].Chip -> Index << endl;
     }
   }
 
   // Now obtain dChi for the selected scattering path and filter the result
   vector <Coordinate> dChij = doDChiCalculation (thePaths, getExptKData ());
+  for (unsigned int i = 0; i < dChij.size (); i ++) {
+    cout << PathNo << "  " << dChij[i].x << ", " << dChij[i].y << endl;
+  }
   FFData dChijData;
   fourierFilter (fkMin, fkMax, fdK, frMin, frMax, fdR, dChij, dChijData);
   return dChijData;
@@ -219,6 +227,7 @@ Coordinate MgstSpectrum::doDChiCalculation1 (vector <DeltaS> &dSIn, double kIn){
       double A    = gsl_cheb_eval (dSIn[j].Chip -> ACheb, k)*dSIn[j].Chip ->S02;
       double P    = gsl_cheb_eval (dSIn[j].Chip -> PCheb, k);
       double Phi  = gsl_cheb_eval (dSIn[j].Chip -> PhiCheb, k);
+      double Lam  = gsl_cheb_eval (dSIn[j].Chip -> LamCheb, k);
       double Sig2 = dSIn[j].Chip -> Sig2;
       double S    = dSIn[j].Chip -> S;
 
@@ -251,11 +260,15 @@ Coordinate MgstSpectrum::doDChiCalculation1 (vector <DeltaS> &dSIn, double kIn){
       // magnetisation state, upon declaration.
       //
       double Rj  = S * 0.5;
-      double dRj = dSIn[j].Chip -> dR;
+      double dRj = dSIn[j].Chip -> dR /*+ dSIn[j].AveMag1*/;
       double dSj = dSIn[j].Ave * (S + 2.0 * dRj);
-      double Cj  = A * pow (Rj, 2) * exp (-2.0 * P * P * Sig2);
+//      cout << k << "\t" << dSIn[j].Chip -> Index << "\t" << dSj << "\t" << dSIn[j].Ave << "\t" << S << endl;
+      double Cj  = A * pow (Rj, 2) * exp (-2.0 * P * P * Sig2 
+        + 2.0 * Sig2 / (Lam * Lam) - 2.0 * dRj / Lam + 4.0 * Sig2 / (Rj * Lam));
       double Dj  = pow (dRj + Rj, -2.0);
-      double Qj  = (2.0 * k * Rj) + Phi + (2.0 * P * dRj) - (4 * P * Sig2/Rj);
+      double Qj  = (2.0 * k * Rj) + Phi + (2.0 * P * dRj) - (4 * P * Sig2 / Rj)
+        - (4.0 * P * Sig2 / Lam);
+
 
       // These commented out lines can be inserted to produce dChi based upon
       // the Taylor approximation formalism.
@@ -268,9 +281,10 @@ Coordinate MgstSpectrum::doDChiCalculation1 (vector <DeltaS> &dSIn, double kIn){
       // Now change the magnetisation to M'' and recalculate the dependent
       // components of the DiffEXAFS function (i.e. Dj and Qj)
       dRj += dSj / 2;
+//      dRj = dSIn[j].Chip -> dR + dSIn[j].AveMag2;
       double Dj2 = pow (dRj + Rj, -2.0);
-      double Qj2 = (2.0 * k * Rj) + Phi + (2.0 * P * dRj) - (4 * P * Sig2/Rj);
-
+      double Qj2 = (2.0 * k * Rj) + Phi + (2.0 * P * dRj) - (4 * P * Sig2 / Rj)
+        - (4.0 * P * Sig2 / Lam);
       // Finally, take the difference between the two measurements to get the
       // overall DiffEXAFS signal.
       NewDChi.y += Cj * ( (Dj * sin (Qj)) - (Dj2 * sin (Qj2)) );
@@ -663,6 +677,7 @@ void MgstSpectrum::contractLegs (vector <Leg*> *PathLegs, double dSMag1In,
       theLeg.z /= VectorLength;
       
       rotateVector (theLeg, x, y, z);
+      cout << theLeg.x << "," << theLeg.y << "," << theLeg.z << endl;
       
       // Add the dS for this leg to the total for the path so far. This is done
       // twice - once for each magnetisation direction.
@@ -691,11 +706,12 @@ void MgstSpectrum::contractLegs (vector <Leg*> *PathLegs, double dSMag1In,
       // store the average of the two. Push this information onto thedS vector,
       // which is now returned to the 'contractPaths' routine above.
       DeltaS *thedS = new DeltaS;
-      thedS -> AveMag1 = dSMag1In * Pol1 * Pol2 / Shells[theShell].Degeneracy;
-      thedS -> AveMag2 = dSMag2In * Pol1 * Pol2 / Shells[theShell].Degeneracy;
+      thedS -> AveMag1 = dSMag1In * Pol1 * Pol2 /*/ Shells[theShell].Degeneracy*/;
+      thedS -> AveMag2 = dSMag2In * Pol1 * Pol2 /*/ Shells[theShell].Degeneracy*/;
       thedS -> Ave = thedS -> AveMag2 - thedS -> AveMag1;
       thedS -> Chip = getPath(Shells[theShell].ChipIndex);
       alldS -> push_back (thedS);
+      cout << dSMag1In << " " << dSMag2In << " " << Pol1 << " " << Pol2 << "      " << thedS -> AveMag1 << "  " << thedS -> AveMag2 << "  " << thedS->Ave << endl;
     }
   }
 }
@@ -723,6 +739,7 @@ double MgstSpectrum::contractToTensor (
       for (int k = 0; k < 3; k ++) {
         for (int l = 0; l < 3; l ++) {
           Sum += Tensor [i][j][k][l] * theLeg[i] * theLeg[j] * Mag[k] * Mag[l];
+          cout << i << "," << j << "," << k << "," << l << ": " << Tensor[i][j][k][l] << "  " << theLeg[i] << "  " << theLeg[j] << "  " << Mag[k] << "  " << Mag[l] << "  " << Sum << endl;
         }
       }
     }

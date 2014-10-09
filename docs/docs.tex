@@ -27,19 +27,18 @@
 \maketitle 
 \tableofcontents
 \chapter{Introduction}
-\dexa comes in two flavours. 
 
 \chapter{Basic Operation}
 \section{Compiling \dexa}
 \subsection{Compiling on Linux type systems}
-If you wish to compile \dexa from the raw source files, you must first make sure that you have on your system:
+To compile \dexa from the raw source files, you must first make sure that you have:
 
 \begin{enumerate}
 \item A working C++ compiler. By default, \dexa will use GNU \verb|g++|. If you have another compiler, modify the first line of the \verb|Makefile| so that \texttt{CC~=~\emph{<your compiler>}}.
 
-\item The GNU Scientific Library (GSL). Both the libraries and the include files must be in the default compiler search path so that it can link to them without explicitly specifying a folder (i.e. with \verb|-L|)
+\item The GNU Scientific Library (GSL). Both the libraries and the include files must be installed to a location where the compiler can find them.
 
-\item The Minuit library if you wish to build the version of \dexa that uses the Minuit routines for the minimisation backend routines.
+\item The Minuit library, which is available from http://seal.web.cern.ch/seal/snapshot/work-packages/mathlibs/minuit/index.html. The latest version tested with \dexa is Minuit 1.7.9.
 
 \item GNU \verb|make| in order to run the \verb|Makefile| included with \dexa.
 \end{enumerate}
@@ -49,9 +48,9 @@ Assuming these are all present, just open a standard terminal window, and enter
   user\@@host: \texttt{cd \emph{<directory where you unpacked DEXA>}}\\
   user\@@host: \verb|make|
 \end{quote}
-This will compile both versions of \dexa and create the binaries \verb|DexaMinuit| and \verb|DexaGsl|. If you want to make these available system-wide (and assuming you have the privilages to do this), enter something like
+This will compile the standard version of \dexa and create the binary \verb|dexa|. If you want to make these available system-wide (and assuming you have the privilages to do this), enter something like
 \begin{quote}
-  user\@@host: \verb|cp Dexa* /usr/local/bin/|
+  user\@@host: \verb|cp dexa /usr/local/bin/|
 \end{quote}
 
 \section{Preparing an input script}
@@ -130,14 +129,14 @@ Command & Synopsis & Arguments \\
 \end{sidewaystable}
 
 \section{Starting \dexa}
-Once you have created an input script, \dexa may be started by calling the version you wish to run from a standard terminal window, followed by the name of the script to be processed. For example, entering
+Once an input script has been created, \dexa may be started from a standard terminal window by calling \verb|dexa|, followed by the name of the script to be processed. For example, entering
 \begin{quote}
-  user\@@host: \verb|DexaMinuit script.dex|
+  user\@@host: \verb|dexa script.dex|
 \end{quote}
-will start the Minuit version of \dexa, and process the contents of \verb|script.dex|. As \dexa progresses through the script it will output useful information to the terminal, including any error or warning messages. If you wish to save this information, just use a standard terminal redirection,
+will start \dexa, and process the contents of \verb|script.dex|. As \dexa progresses through the script it will output useful information to the terminal, including any error or warning messages. If you wish to save this information, just use a standard terminal redirection,
 such as
 \begin{quote}
-  user\@@host: \verb|DexaMinuit script.dex > output.txt|
+  user\@@host: \verb|dexa script.dex > output.txt|
 \end{quote}
 In this case, nothing will be output to the terminal, with the information instead being written to \verb|output.txt|.
 

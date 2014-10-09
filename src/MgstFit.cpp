@@ -38,7 +38,7 @@
 #define SCRIPT_ARG  1 // The script is the first argument
 #define VERBOSE_ARG 2 // The verbose option is the second argument
 
-#define VERSION_TAG "dexa 1.0.2"
+#define VERSION_TAG "dexa 1.0.3"
 
 //------------------------------------------------------------------------------
 // printHelp () : Prints some syntax help to the standard output.

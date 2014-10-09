@@ -378,13 +378,14 @@ int DiffXasSpectrum::readFeffFile(ifstream &FeffFile, const char *FeffFilename){
       iss.clear ();
       
       NewPath.A.push_back (
-        Degeneracy * NextLine[FEFF_MAG_COL-1] * NextLine[FEFF_RED_FAC_COL-1] 
+        /*Degeneracy * */NextLine[FEFF_MAG_COL-1] * NextLine[FEFF_RED_FAC_COL-1] 
         * exp (-2.0 *Radius/NextLine[FEFF_LAMBDA_COL-1])/(NextLine[FEFF_K_COL-1]
         * Radius * Radius));
       NewPath.Phi.push_back (
         NextLine[FEFF_REAL_2PHC_COL-1] + NextLine[FEFF_PHASE_COL-1]);
-      NewPath.K.push_back (NextLine[FEFF_K_COL-1]);
+      NewPath.K.push_back (NextLine[FEFF_K_COL - 1]);
       NewPath.P.push_back (NextLine[FEFF_REAL_P_COL -1]);
+      NewPath.Lam.push_back (NextLine[FEFF_LAMBDA_COL - 1]);
     }
   }
 
@@ -393,6 +394,7 @@ int DiffXasSpectrum::readFeffFile(ifstream &FeffFile, const char *FeffFilename){
   NewPath.ACheb = gsl_cheb_alloc (CHEB_ORDER);
   NewPath.PhiCheb = gsl_cheb_alloc (CHEB_ORDER);
   NewPath.PCheb = gsl_cheb_alloc (CHEB_ORDER);
+  NewPath.LamCheb = gsl_cheb_alloc (CHEB_ORDER);
   evalTheoryChebyshevs (&NewPath);
   
   ScatteringPaths.push_back (NewPath);
@@ -488,6 +490,7 @@ int DiffXasSpectrum::saveTheory (const char *Filename, vector<Coordinate> &DiffX
   vector < vector <Coordinate> > AllKData;
   vector < vector <Coordinate> > AllRData;
   vector < vector <Coordinate> > AllQData;
+  cout << "SaveTheory" << endl;
   FFData PathData = getDChiPath (0);
   
   AllKData.push_back (getTheoryKData ());
@@ -495,6 +498,7 @@ int DiffXasSpectrum::saveTheory (const char *Filename, vector<Coordinate> &DiffX
   AllQData.push_back (getTheoryQData ());
   DiffXas = AllQData[0];
   for (unsigned int j = 0; j < ScatteringPaths.size (); j ++) {
+    cout << j << "/" << ScatteringPaths.size() << " :     " << flush;
     PathData = getDChiPath (j);
     AllKData.push_back (PathData.KData);
     AllRData.push_back (PathData.RData);
@@ -615,11 +619,15 @@ void DiffXasSpectrum::evalTheoryChebyshevs (Path *thePath) {
   gsl_cheb_init (thePath->PhiCheb, &F, thePath->K[0], 
     thePath->K[thePath->K.size()-1]);
     
-  if (thePath->P.size() > 0) {
-    F.function = &DiffXasSpectrum::pFunction;
-    gsl_cheb_init (thePath->PCheb, &F, thePath->K[0], 
-      thePath->K[thePath->K.size()-1]);
-  }
+//  if (thePath->P.size() > 0) {
+  F.function = &DiffXasSpectrum::pFunction;
+  gsl_cheb_init (thePath->PCheb, &F, thePath->K[0], 
+    thePath->K[thePath->K.size()-1]);
+//  }
+
+  F.function = &DiffXasSpectrum::lambdaFunction;
+  gsl_cheb_init (thePath->LamCheb, &F, thePath->K[0], 
+    thePath->K[thePath->K.size()-1]);
 }
 
 
@@ -711,6 +719,39 @@ double DiffXasSpectrum::pFunction (double k, void *p) {
         ((k - thePath -> K[LowerPoint]) /
         ((thePath -> K[UpperPoint] - thePath -> K[LowerPoint]))) *
         (thePath->P[UpperPoint] - thePath->P[LowerPoint]);
+    }
+
+    if (k > thePath -> K[MidPoint]) {
+      LowerPoint = MidPoint;
+    } else {
+      UpperPoint = MidPoint;
+    }
+  } while (true);
+}
+
+
+//------------------------------------------------------------------------------
+// lambdaFunction (double, void*) : Used by GSL's gsl_cheb_init to evaluate
+// Lambda_j(k) at any value k between the 0.0 and CHIP_MAX_K. At this stage,
+// points between those specified in the chipNNNN.dat files are determined by
+// linear interpolation.
+//
+double DiffXasSpectrum::lambdaFunction (double k, void *p) {
+  int UpperPoint, LowerPoint, MidPoint;
+  
+  Path *thePath = (Path *)p;
+  LowerPoint = 0; UpperPoint = thePath -> K.size () - 1;
+
+  if (k >= thePath -> K[UpperPoint]) { return thePath -> Lam[UpperPoint]; } 
+  else if (k <= thePath -> K[LowerPoint]) { return thePath -> Lam[LowerPoint]; }
+
+  do {
+    MidPoint = int((UpperPoint - LowerPoint) / 2) + LowerPoint;
+    if (MidPoint == UpperPoint || MidPoint == LowerPoint) {
+      return thePath->Lam[LowerPoint] + 
+        ((k - thePath -> K[LowerPoint]) /
+        ((thePath -> K[UpperPoint] - thePath -> K[LowerPoint]))) *
+        (thePath->Lam[UpperPoint] - thePath->Lam[LowerPoint]);
     }
 
     if (k > thePath -> K[MidPoint]) {

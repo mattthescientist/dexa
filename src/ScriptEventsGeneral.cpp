@@ -442,12 +442,14 @@ int savespectrum (stringstream &args, vector<structure> &Structures) {
     // Save the full, optimised theory DiffXAS (sum over paths and structures)
     // This is only needed if there is more than one sub-structure as otherwise
     // the full spectrum will just be the first structure component saved above.
-    ofstream OutputFile (Filename.c_str(), ios::out);
-    for (i = 0; i < TotalDiffXas.size (); i ++) {
-      OutputFile << showpos << scientific << TotalDiffXas[i].x 
-        << '\t' << TotalDiffXas[i].y << endl;
+    if (Structures.size () > 1) {
+      ofstream OutputFile (Filename.c_str(), ios::out);
+      for (i = 0; i < TotalDiffXas.size (); i ++) {
+        OutputFile << showpos << scientific << TotalDiffXas[i].x 
+          << '\t' << TotalDiffXas[i].y << endl;
+      }
+      OutputFile.close ();
     }
-    OutputFile.close ();
 
     // If the Fourier filter is being used, save the intermediate filter files.
     if (Structures[0].Spectrum.usingFourierFilter ()) {
