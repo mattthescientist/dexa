@@ -1,0 +1,16 @@
+--------------------------------------
+The Differential EXAFS Analyser (DEXA)
+--------------------------------------
+
+The source code is best compiled with GNU make. Please read the notes at the top
+of Makefile for further instructions. Documentation is found in the docs folder 
+in DVI and PDF format, with the original LaTeX source file also available.
+
+Before compiling, check you have:
+
+ GNU Scientific Library (GSL) (absolutely required)
+ Minuit library               (for the Minuit version of DEXA)
+ GNU make
+ GNU g++                      (or equivalent C++ compiler)
+ 
+If everything is installed to default system locations, just type 'make'...

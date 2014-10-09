@@ -1,0 +1,11 @@
+*.[oa]
+*~
+*.bak
+dexa
+dexa_gsl
+Debug
+debug
+.settings
+.cproject
+.project
+.settings

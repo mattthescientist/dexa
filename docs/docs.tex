@@ -1,0 +1,508 @@
+% Copyright (C) 2007-2009 Matthew Ruffoni
+%
+% This file is part of DEXA.
+%
+% DEXA is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% DEXA is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with DEXA.  If not, see <http://www.gnu.org/licenses/>.
+%
+\documentclass[a4paper,12pt]{report}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{rotating}
+\newcommand{\dexa}{\emph{DEXA} }
+\newcommand{\feff}{\emph{FEFF} }
+\newcommand{\abinitio}{\emph{ab initio} }
+\title{DEXA User Manual}
+\begin{document}
+\maketitle 
+\tableofcontents
+\chapter{Introduction}
+\dexa comes in two flavours. 
+
+\chapter{Basic Operation}
+\section{Compiling \dexa}
+\subsection{Compiling on Linux type systems}
+If you wish to compile \dexa from the raw source files, you must first make sure that you have on your system:
+
+\begin{enumerate}
+\item A working C++ compiler. By default, \dexa will use GNU \verb|g++|. If you have another compiler, modify the first line of the \verb|Makefile| so that \texttt{CC~=~\emph{<your compiler>}}.
+
+\item The GNU Scientific Library (GSL). Both the libraries and the include files must be in the default compiler search path so that it can link to them without explicitly specifying a folder (i.e. with \verb|-L|)
+
+\item The Minuit library if you wish to build the version of \dexa that uses the Minuit routines for the minimisation backend routines.
+
+\item GNU \verb|make| in order to run the \verb|Makefile| included with \dexa.
+\end{enumerate}
+
+Assuming these are all present, just open a standard terminal window, and enter
+\begin{quote}
+  user\@@host: \texttt{cd \emph{<directory where you unpacked DEXA>}}\\
+  user\@@host: \verb|make|
+\end{quote}
+This will compile both versions of \dexa and create the binaries \verb|DexaMinuit| and \verb|DexaGsl|. If you want to make these available system-wide (and assuming you have the privilages to do this), enter something like
+\begin{quote}
+  user\@@host: \verb|cp Dexa* /usr/local/bin/|
+\end{quote}
+
+\section{Preparing an input script}
+\dexa will analyse a given DiffXAS problem from instructions given in an input script. This script must do such things as tell \dexa how many spectra need fitting, where to find the experimental and \emph{ab initio} data, what type of sample was used and how it was mounted in the beam, and finally, what DiffXAS parameters must be fitted.
+
+Table \ref{table:commands} gives the full list of valid commands for use in the input, script along with their syntax. They are split into three sections: Global commands that affect the entire analysis environment and all spectra and structures contained within, spectrum commands affecting only a specific spectrum object, and structure commands for handling a given spectrum sub-structure. The distinction between these three classes is largely irrelevent for simple analyses, but becomes important for the more complex tasks described in Chapter \ref{chapter:advanced}. A full command reference is given in Chapter \ref{chapter:commandref}. All commands are {\bf case-sensitive}.
+
+The first task of the input script is to create a spectrum object that will be then be developed into a representation of the studied DiffXAS within \dexa. This is done quite simply with
+
+\begin{quote}
+  \verb|  create| \emph{\texttt{<spectrum name>}}
+\end{quote}
+where \emph{\texttt{<spectrum name>}} is replaced with any desired name for the spectrum, which may include any alpha-numeric character but no spaces.
+
+Once such a blank spectrum has been created, it must be developed into the studied DiffXAS signal by loading both \emph{ab initio} information from \feff and the experimental data. Assuming all the necessary data files exist in the same directory from which \dexa was executed, this can be done with
+\begin{quote}
+  \begin{verbatim}
+  create FeSpectrum
+  FeSpectrum.spectrum FeDiffXAS.dat 0 1 2
+  FeSpectrum.feffinp  feff.inp
+  FeSpectrum.pathsdat paths.dat
+  \end{verbatim}
+\end{quote}
+
+The experimental DiffXAS is assumed to be in a file called \verb|FeDiffXAS.dat|, and is loaded with \verb|.spectrum|. The three numeric arguments at the end of the command specify, respectively, how many lines to discard at the top of the file for its header, and then the column indicies for the x- and y-axis data, with the first column being number 1. \verb|.feffinp| and \verb|.pathsdat| then load the \feff \verb|feff.inp| and \verb|paths.dat| files in order to firstly obtain the crystallographic co-ordinates and species of each of the atoms in the model structure, and then the information describing the important scattering paths.
+
+
+
+
+
+\newpage
+\begin{sidewaystable}
+\begin{tabular}{|l|l|l|}
+\hline
+\multicolumn{3}{|l|}{\bf Global Commands} \\
+\multicolumn{3}{|l|}{General syntax: \emph{\texttt{<command> <arguments>}}} \\
+\hline
+Command & Synopsis & Arguments \\
+\hline
+\verb|create| & Creates a new spectrum object for analysis & \emph{\texttt{<spectrum>}} \\
+\verb|magnetisation| & Sets the two sample magnetisation vectors & \emph{\texttt{<x1> <y1> <z1> <x2> <y2> <z2>}} \\
+\verb|polarisation| & Sets the x-ray polarisation vector & \texttt{\emph{<x> <y> <z>}} \\
+\verb|preforientation| & Adds a crystallite preferential orientation & \texttt{\emph{<$\theta_1$> <$\theta_2$> <$\theta_3$> <degree>}} \\
+\verb|numavesteps| & Sets the number of configurational averaging steps & \texttt{\emph{<steps>}} \\
+\verb|startfit| & Starts the fit & \texttt{\emph{[<iterations>]}} \\
+\verb|saveparams| & Saves the current state of all fit parameters & \texttt{\emph{<file>}} \\
+\hline
+\hline
+\multicolumn{3}{|l|}{\bf Spectrum Commands} \\
+\multicolumn{3}{|l|}{General syntax: \emph{\texttt{<spectrum>.<command> <arguments>}}} \\
+\hline
+Command & Synopsis & Arguments \\
+\hline
+\verb|addstructure| & Creates a new sub-structure for the given spectrum & \emph{\texttt{<structure>}} \\
+\verb|feffinp| & Loads a \feff feff.inp data file & \emph{\texttt{<file>}} \\
+\verb|pathsdat| & Loads a \feff paths.dat data file & \emph{\texttt{<file>}} \\
+\verb|spectrum| & Loads the experimental DiffXAS data & \texttt{\emph{<file> <header> <xcol> <ycol>}} \\
+\verb|filter| & Fourier filters the experimental data & \texttt{\emph{<kmin> <kmax> <dk> <rmin> <rmax> <dr>}} \\
+\verb|saveexperiment| & Saves the experimental DiffXAS data & \emph{\texttt{<file>}} \\
+\verb|savespectrum| & Saves the theory DiffXAS spectrum & \emph{\texttt{<file>}} \\
+\hline
+\hline
+\multicolumn{3}{|l|}{\bf Structure Commands} \\
+\multicolumn{3}{|l|}{General syntax: \emph{\texttt{<spectrum>[.<structure>].<command> <arguments>}}} \\
+\hline
+Command & Synopsis & Arguments \\
+\hline
+\verb|symmetry| & Defines the structural symmetry of the sample & \texttt{\emph{<symmetry>}} \\
+\verb|addpath| & Adds a new \feff scattering path & \emph{\texttt{<file> <header>}} \\
+\verb|updatepath| & Modifies a given scattering path property & \texttt{\emph{<path> <property> <value>}} \\
+\verb|setparameter| & Sets the value of a given DiffXAS parameter &   \texttt{\emph{<parameter> <value> [<path>]}} \\
+\verb|fitparameter| & States that a given parameter should be fitted & \texttt{\emph{<name> <parameter> [<path>]}} \\
+\hline
+\end{tabular}
+\caption{\label{table:commands}The list of valid commands for use in a \dexa input script.}
+\end{sidewaystable}
+
+\section{Starting \dexa}
+Once you have created an input script, \dexa may be started by calling the version you wish to run from a standard terminal window, followed by the name of the script to be processed. For example, entering
+\begin{quote}
+  user\@@host: \verb|DexaMinuit script.dex|
+\end{quote}
+will start the Minuit version of \dexa, and process the contents of \verb|script.dex|. As \dexa progresses through the script it will output useful information to the terminal, including any error or warning messages. If you wish to save this information, just use a standard terminal redirection,
+such as
+\begin{quote}
+  user\@@host: \verb|DexaMinuit script.dex > output.txt|
+\end{quote}
+In this case, nothing will be output to the terminal, with the information instead being written to \verb|output.txt|.
+
+\chapter{Advanced Features}
+\label{chapter:advanced}
+\section{Fitting Data from Multiple Edges}
+\label{section:multiple}
+By treating each spectrum as separate entities, it is quite straightforward to use \dexa to simultaneously analyse multiple spectra from different absorption edges in a sample. Simply use the \verb|create| command to create one spectrum object for each of the data sets to be included in the analysis. For example, entering
+\begin{quote}
+  \begin{verbatim}
+  create FeSpectrum
+  FeSpectrum.spectrum FeCoDiffXAS_FeK.dat 0 1 2
+  FeSpectrum.feffinp  feffFeK.inp
+  FeSpectrum.pathsdat pathsFeK.dat
+
+  create CoSpectrum  
+  CoSpectrum.spectrum FeCoDiffXAS_CoK.dat 0 1 2
+  CoSpectrum.feffinp  feffCoK.inp
+  CoSpectrum.pathsdat pathsCoK.dat
+  \end{verbatim}
+\end{quote}
+would create two spectra for some supposed Fe and Co data, which are then managed individually using the appropriate spectrum name as a prefix. Later in the script, when \verb|startfit| is called, \dexa will take all created spectrum objects and fit their parameters simultaneously.
+
+The only other point to note is that when dealing with two or more spectra, it becomes important to appreciate the difference between global commands and those applying to spectra or structures (as listed in Table \ref{table:commands}). Global commands, of which \verb|create| is one, are \emph{not} prefixed with a spectrum or structure name. This class of command covers aspects of the fit that, for instance, relate to the mounting of the sample in the beam, or the basic properties of the sample, and so must apply to \emph{all} spectrum objects. By contrast, Spectrum commands affect only a single spectrum, and so \emph{must} be prefixed with the name of a previously created spectrum object. A further distinction comes into play when multiple structures are defined, as described in Section \ref{section:substructures}.
+
+
+
+
+\section{Linking Parameters}
+\label{section:linking}
+When dealing with more complex DiffXAS analyses, and especially when dealing with a simultaneous fit at multiple absorption edges, there may be some physical necessity to link parameters within a spectrum or across multiple spectra. This would be the case, for instance, when looking at strain in an A-B type bond from both the A and B element absorption edges. The strain from the point of view of one should be reciprocated by the other.
+
+Linking parameters in this way is done with the \verb|fitparameter| command. When adding a new fit parameter in the input script, the parameter must be assinged a \emph{\texttt{<name>}}. There are no constrains on what name to choose, but each independent fit parameter must have a unique name. To link two or more parameters, simply assign them the same name. For example, taking the multiple edge script extract given in Section \ref{section:multiple}, and adding
+\begin{quote}
+  \begin{verbatim}
+  FeSpectrum.fitparameter lg2 lambdaG2
+  CoSpectrum.fitparameter lg2 lambdaG2
+  \end{verbatim}
+\end{quote}
+would link the $\lambda^{\gamma,2}$ parameters of both \verb|FeSpectrum| and \verb|CoSpectrum| since both have been given the name \verb|lg2|. Consequently, at the end of the fitting process, both spectra will have the same $\lambda^{\gamma,2}$. Note that, currently, it is only possible to do direct one-to-one linking such as this. It is not possible to enter some mathematical expression to define a more complex relation between fit parameters.
+
+
+
+
+\section{Using Sub-structures}
+\label{section:substructures}
+The macroscopic description of crystal strain, through such things as Neumann's Principle and crystal tensors, works in the language of unit cells and lattices, and concerns the long range order of the sample structure. This can be transferred to DiffXAS, but it is often more meaningful to describe strain in terms of changes in specific bond lengths; to relax crystallographic arguments and deal explicitly with the sample's short range order.
+
+This is especially true when attempting to fully exploit the chemical selectivity of DiffXAS in determining the strain surrounding different atomic environments in a multicomponent system. 
+
+Take, for instance, the magnetostriction of rare-earth iron alloys such as Fe$_2$Tb. These systems form in a cubic phase, and would macroscopically be described with two coefficients - one for strain along the 100 lattice vector, and one for strain along the 111. A similar approach is possible with \dexa by loading information pertaining to each bond with \verb|addpath|, declaring the sample is cubic with the \verb|symmetry| command, and then fitting a single $\lambda^{\gamma,2}$ and $\lambda^{\epsilon,2}$ to the entire structure.
+
+However, locally, the spin-orbit coupling of the rare-earth atom is considerably larger than that of the Fe atom, such that one would expect a significant difference in the response of Fe-Fe and Fe-Tb bonds in an applied magnetic field. It would therefore be desirable to handle each independently; to assign separate coefficients to the sub-lattice comprising the Fe-Fe bonds, and that composed of Fe-Tb bonds.
+
+Thus, whilst it is possible to work within the language of crystals - with the strain in specific bonds defined by some overall crystal strain and the crystallographic position of given atoms - \dexa also allows `sub-structures' to be created to divide the macroscopic structure into a number of units that are expected to exhibit different short-range behaviour.
+
+Each unit is created within a spectrum object using the \verb|addstructure| command. For example, entering
+
+\begin{quote}
+  \begin{verbatim}
+  FeSpectrum.addstructure FeFe
+  FeSpectrum.addstructure FeTb
+  \end{verbatim}
+\end{quote}
+would create two sub-structures; one called \verb|FeFe|, and the other, \verb|FeTb|. The `Structure commands' listed in Table \ref{table:commands}, can then work on each of the sub-structures by giving the spectrum name \emph{and} structure name in the command prefix. For example, entering
+\begin{quote}
+  \begin{verbatim}
+  FeSpectrum.FeFe.addpath feff0001.dat 10
+  FeSpectrum.FeTb.addpath feff0002.dat 10
+  FeSpectrum.FeFe.addpath feff0003.dat 10
+  FeSpectrum.FeTb.addpath feff0004.dat 10
+  \end{verbatim}
+\end{quote}
+would load \verb|feff0001.dat| and \verb|feff0003.dat| into the \verb|FeFe| structure, and \verb|feff0002.dat| and \verb|feff0004.dat| into \verb|FeTb|, where it is assumed that \feff produced an Fe-Fe type path at indicies 1 and 3 in its \verb|paths.dat|, and an Fe-Tb type path at indicies 2 and 4. Subseqeuently, separate magnetostrictive strains may be applied to each sub-structure with
+\begin{quote}
+  \begin{verbatim}
+  FeSpectrum.FeFe.fitparameter lg2FeFe lambdaG2
+  FeSpectrum.FeTb.fitparameter lg2FeTb lambdaG2
+  \end{verbatim}
+\end{quote}
+As with complete crystal structures, individual parameters may be linked by assigning the same parameter name to all parameters that should have the same value.
+
+{\bf Note}, however, that at present, sub-structures should only be used with single-scattering paths. \dexa does not yet decompose multiple-scattering paths into their individual components in order to assure that each leg is assigned to the correct sub-structure. Thus, by including multiple-scattering paths in one structure or other could cause one or more identical legs to be assigned different properties at different parts of the DiffXAS calculation.
+
+
+
+\section{A Complete Example}
+\begin{quote}
+  \begin{verbatim}
+  *------------------------------------------------------
+  * Prepare the spectrum objects
+  *
+  create FeSpectrum
+  FeSpectrum.spectrum FeCoDiffXAS_FeK.dat 0 1 2
+  FeSpectrum.feffinp  feffFeK.inp
+  FeSpectrum.pathsdat pathsFeK.dat
+  FeSpectrum.filter 3 10 1.0 1.8 2.8 0.1
+
+  create CoSpectrum  
+  CoSpectrum.spectrum FeCoDiffXAS_CoK.dat 0 1 2
+  CoSpectrum.feffinp  feffCoK.inp
+  CoSpectrum.pathsdat pathsCoK.dat
+  CoSpectrum.filter 3 10 1.0 1.8 2.8 0.1
+  
+  *------------------------------------------------------
+  * Define the sample environment
+  *
+  magnetisation 1 0 0 0 1 0
+  polarisation 1 0 0
+  preforientation 0 0 0 1.0
+
+  *------------------------------------------------------
+  * Create the spectrum sub-structures and load the
+  * individual path information from FEFF
+  *
+  FeSpectrum.addstructure FeFe  
+  FeSpectrum.addstructure FeCo
+  CoSpectrum.addstructure CoFe
+  CoSpectrum.addstructure CoCo  
+  
+  FeSpectrum.FeFe.addpath feff0001Fe.dat 10
+  FeSpectrum.FeCo.addpath feff0002Fe.dat 10
+  CoSpectrum.CoFe.addpath feff0001Co.dat 10
+  CoSpectrum.CoCo.addpath feff0002Co.dat 10
+  
+  *------------------------------------------------------
+  * Update the reference structure
+  *
+  * updatepath would be used here to insert the results 
+  * from a conventional EXAFS fit, and so define the 
+  * reference structure for the DiffXAS.
+  
+  *------------------------------------------------------
+  * Define the fit parameters and link the Fe-Co bond.
+  *  
+  FeSpectrum.FeFe.fitparameter lg2FeFe lambdaG2
+  FeSpectrum.FeCo.fitparameter lg2FeCo lambdaG2
+  CoSpectrum.CoFe.fitparameter lg2FeCo lambdaG2
+  CoSpectrum.CoCo.fitparameter lg2CoCo lambdaG2
+
+  *------------------------------------------------------
+  * Perform the fit and save the results
+  *
+  FeSpectrum.saveexperiment FeK_Filtered.dat
+  CoSpectrum.saveexperiment CoK_Filtered.dat
+
+  startfit
+
+  saveparams FitResults.dat  
+  FeSpectrum.savespectrum FittedFeK.dat
+  CoSpectrum.savespectrum FittedCoK.dat
+
+  \end{verbatim}
+\end{quote}
+
+\chapter{Command Reference}
+\label{chapter:commandref}
+\section{Global Commands}
+The commands in this section act on the entire \dexa fitting environment rather than on one specific spectrum. Commands marked with a `\verb|*|' are compulsory and must appear at least once in your \dexa input script. All commands are case-sensitive and so must be entered exactly as they are written here.
+\subsection{\texttt{create} *}
+Syntax:
+\begin{quote}
+\texttt{create \emph{<spectrum>}}
+\end{quote}
+Creates a new spectrum object called \emph{\texttt{<spectrum>}}. This spectrum's properties, given in section \ref{sec:speccmd}, may then be modified using the `\verb|.|' delimiter in the general format \texttt{\emph{<spectrum>.<command> <options>}}.
+
+It is necessary to create at least one spectrum object at the start of the \dexa input file in order to perform an analysis. If more than one spectrum is created, all will be fitted simultaneously. This makes it possible to link parameters that are common to more than one spectrum, such as when viewing an A-B bond from both the A and B absorption edges. See section \ref{sec:linking} for more details on linking parameters.
+
+\subsection{\texttt{magnetistion} *}
+Syntax:
+\begin{quote}
+  \texttt{magnetisation \emph{<x1> <y1> <z1> <x2> <y2> <z2>}}
+\end{quote}
+Sets the two DiffXAS sample magnetisation vectors. The first vector is defined by the first three arguments (\emph{\texttt{<x1>}}, \emph{\texttt{<y1>}}, and \emph{\texttt{<z1>}}), and the second by the last three (\emph{\texttt{<x2>}}, \emph{\texttt{<y2>}}, and \emph{\texttt{<z2>}}). Both must be unit vectors such that $(x^2 + y^2 + z^2)^{1/2} = 1$. For the standard DiffXAS configuration, where all coordinates are specified in the beamline frame with the beam propogating along the +z direction, the first vector would be $(1, 0, 0)$ and the second $(0, 1, 0)$. This command must be called at some point before \verb|startfit|.
+
+\subsection{\texttt{polarisation} *}
+Syntax:
+\begin{quote}
+  \texttt{polarisation \emph{<x> <y> <z>}}
+\end{quote}
+Sets the x-ray polarisation vector. It must be specified as a unit vector such that $(x^2 + y^2 + z^2)^{1/2} = 1$. For the standard DiffXAS configuration, where all coordinates are specified in the beamline frame with the beam propogating along the +z direction, the polarisation vector would typically be $(1, 0, 0)$. This command must be called at some point before \verb|startfit|.
+
+\subsection{\texttt{numavesteps}}
+Syntax:
+\begin{quote}
+  \texttt{numavesteps \emph{<steps>}}
+\end{quote}
+Sets the number individual crystal orientations to use when averaging crystallite contributions about some preferential axis. The larger the value of \texttt{\emph{<num steps>}}, the closer the average will be to a true random distribution about the axis, but the longer \dexa will take to perform the averaging. The default value is $64$. When averaging crystallites with no preferential orientation, contributions are averaged by \texttt{\emph{<num steps>}} about a circle, and \texttt{\emph{<num steps>}}$/2$ circles to cover the complete surface of a sphere.
+
+It is recommended to leave this parameter alone unless you are using a single crystal sample. In this case, no crystallite averaging is needed, so \texttt{\emph{<num steps>}} should be set to $1$. A \verb|preforientation| of \texttt{\emph{<degree>}} 1.0 should then be used to orientate the crystal correctly in the beamline frame.
+
+\subsection{\texttt{startfit}}
+Syntax:
+\begin{quote}
+  \texttt{startfit \emph{[<iterations>]}}
+\end{quote}
+Once all spectrum objects have been prepared and the important experiment vectors defined (sample magnetisation and x-ray polarisation), this command starts the fitting process that attempts to optimise the declared parameters. The optional argument \texttt{\emph{[<iterations>]}} may be used to specify the maximum number of iterations allowed by the minimisation routine. If it is not specified, the algorithm itself will only quit once it has reached an acceptable minimum.
+
+If the specified fit parameters are assigned a value before calling \verb|startfit|, that value will be used as a first guess by the optimisation algorithm. Once \verb|startfit| has finished, each fit parameter will contain its optimised value.
+
+Whilst this command isn't compulsory, it must be called for any optimisation of fit parameters to take place. 
+
+\subsection{\texttt{saveparams}}
+Syntax:
+\begin{quote}
+  \texttt{saveparams \emph{<file>}}
+\end{quote}
+Outputs the current value of all fit parameters to the text file specified by \emph{\texttt{<file>}}. If this file already exists it will be overwritten! Calling \verb|saveparams| before \verb|startfit| will save the first guess values, whilst calling it after will save the optimised values.
+
+\section{Spectrum Commands}
+\label{sec:speccmd}
+These commands define the properties of a specific spectrum. In each case, they must be prefixed by a spectrum name and the `\verb|.|' delimiter according to the general rule \texttt{\emph{<spectrum>.<command> <options>}}. The spectrum name, \texttt{\emph{<spectrum>}}, must refer to a spectrum object previously created with the \verb|create| command. All commands are case-sensitive and so must be entered exactly as they are written here.
+
+\subsection{\texttt{spectrum} *}
+Syntax:
+\begin{quote}
+  \texttt{spectrum \emph{<file> <header> <xcol> <ycol>}}
+\end{quote}
+Loads an experimental DiffXAS spectrum into the \dexa  spectrum object. The data must be in columns that are delimited by one or more white-space characters (a space or tab). The x ordinate (wavenumber) data is read from column \texttt{\emph{<xcol>}}, and the y ordinate (absorption) data from column \texttt{\emph{<ycol>}}. The numbering is base-1 such that first column on a line is column $1$. 
+
+The \texttt{\emph{<header>}} argument must tell \dexa how many lines are taken up at the start of the file by its header, before the actual data is reached. There must be no additional comments after the data at the end of the file.
+
+
+\subsection{\texttt{feffinp} *}
+Syntax:
+\begin{quote}
+  \texttt{feffinp \emph{<file>}}
+\end{quote}
+Declares the name, \texttt{\emph{<file>}}, of the \feff  \verb|feff.inp| file that is to be loaded into the spectrum. In reality, only the coordinates of the atoms in the \feff  cluster are needed by \dexa, so all \feff  flags are ignored except for POTENTIALS and ATOMS. This command must be called before setting any spectrum properties that relate to specific scattering paths.
+
+\subsection{\texttt{pathsdat} *}
+Syntax:
+\begin{quote}
+  \texttt{pathsdat \emph{<file>}}
+\end{quote}
+Declares the name, \texttt{\emph{<file>}}, of the \feff  \verb|paths.dat| file that is to be loaded into the spectrum. This will define all the possible scattering paths that can be considered in the \dexa fit. However, only those paths for which a \verb|feffNNNN.dat| file is later declared (with \verb|addpath|) will actually be included in the analysis. This command must be called before any other commands relating to specific scattering paths.
+
+\subsection{\texttt{addpath} *}
+Syntax:
+\begin{quote}
+  \texttt{addpath \emph{<file> <header>}}
+\end{quote}
+Adds a new scattering path to the spectrum, which will subsequently be considered during the analysis. At least one scattering path must be defined. The filename \texttt{\emph{<file>}} must point to the \verb|feffNNNN.dat| file produced for the scattering path that is to be added. In turn, this file must come from the same \feff calculation as the \verb|paths.dat| file specified with the \verb|pathsdat| command. 
+
+The \texttt{\emph{<header>}} argument declares the number of lines to discard in the header of the \verb|feffNNNN.dat| file. It should be set to $8$ for files produced with \feff 6, and $10$ for those from \feff 8.
+
+\subsection{\texttt{updatepath}}
+Syntax:
+\begin{quote}
+  \texttt{updatepath \emph{<path> <property> <value>}}
+\end{quote}
+Modifies a given property of the named scattering path. \emph{\texttt{<path>}} must match the filename of a \verb|feffNNNN.dat| file that has previously been loaded with the \verb|addpath| command. \emph{\texttt{<property>}} defines which path property should be modified, and must be one of \verb|S02|, \verb|Sig2|, or \verb|dR| to set the EXAFS factors $S_0^2$, $\sigma^2$, or $\Delta R$ respectively. Each will typically be obtained from the results of a fit to the sample's conventional EXAFS spectrum. If \feff's DEBYE flag was used, the \emph{\texttt{<value>}} accompanying \verb|Sig2| should be the fitted value minus the portion calculated by \feff and given in the \verb|feffNNNN.dat|. The $\Delta R$ is the difference between the half path length found in \feff's \verb|paths.dat| and that fitted to experiment.
+
+The default value for each path property will be those loaded from the \feff \verb|paths.dat| and \verb|feffNNNN.dat| files.
+
+\subsection{\texttt{setparameter}}
+Syntax:
+\begin{quote}
+  \texttt{setparameter \emph{<parameter> <value> [<path>]}}
+\end{quote}
+Sets a property of the sample or DiffXAS spectrum as a whole. Unlike \verb|updatepath|, \verb|setparameter| is used to set properties which affect all scattering paths. The  \emph{\texttt{<parameter>}} must be one of those listed in Table \ref{table:parameterlist}. The optional \emph{\texttt{<path>}} parameter is only specified for parameters that affect a single scattering path. It should be an integer, with the first path loaded by \verb|addpath| assigned the number 0. For parameters that apply to the whole crystal, it is omitted.
+
+The parameter list is the same as that used by \verb|fitparameter|. It is therefore possible to use \verb|setparameter| before starting the fitting process in order to define first guesses to the optimised paramter values. This will then improve the chance of the fitting algorithm finding the correct minimum.
+
+\subsection{\texttt{fitparameter}}
+Syntax:
+\begin{quote}
+  \texttt{fitparameter \emph{<name> <parameter> [<path>]}}
+\end{quote}
+Adds the specified \texttt{\emph{<parameter>}} to the list of those to be fitted by \dexa once \verb|startfit| is called. The  It must be one of the parameters listed in Table \ref{table:parameterlist}. The \texttt{\emph{<path>}} argument is only used for parameters that apply to a specific scattering path. It should be an integer, with the first path loaded by \verb|addpath| assigned the number 0. For parameters that apply to the whole crystal, it is omitted.
+
+The \texttt{\emph{<name>}} may be anything you like, but is important when linking parameters. All parameters with a unique \texttt{\emph{<name>}} are fitted individually, but when two or more parameters have the same \texttt{\emph{<name>}}, \dexa will link them during the fit so that they are all assigned the same numerical value. See section \ref{sec:linking} for more details on linking parameters.
+
+\begin{table}
+\begin{tabular}{lll}
+\texttt{\emph{<parameter>}} & Factor & Notes \\
+\hline
+ \verb|lambdaA0| & $\lambda^{\alpha,0}$ & Volume magnetostriction \\
+ \verb|lambdaG2| & $\lambda^{\gamma,2}$ & Equivalent to $(3/2)\lambda_{100}$ in cubic symmetry \\
+ \verb|lambdaE2| & $\lambda^{\epsilon,2}$ & Equivalent to $(3/2)\lambda_{111}$ in cubic symmetry \\
+ \verb|lambdaD2| & $\lambda^{\delta,2}$ & \\
+ \verb|lambda1A2| & $\lambda_1^{\alpha,2}$ & \\
+ \verb|lambda1G2| & $\lambda_1^{\gamma,2}$ & \\
+ \verb|lambda2G2| & $\lambda_2^{\gamma,2}$ & \\
+ \verb|lambda3G2| & $\lambda_3^{\gamma,2}$ & \\
+ \verb|lambda4G2| & $\lambda_4^{\gamma,2}$ & \\
+ \verb|dE| & $\Delta E$ & The offset between the experimental edge energy \\
+& & and that determined by \feff in eV. This should\\
+& & be set from the results of a normal EXAFS fit.\\
+
+ \verb|dSig2j| & $\Delta\sigma_j^2$ \\
+ \verb|prefX| & \\
+ \verb|prefY| & \\
+ \verb|prefZ| & \\
+ \verb|prefDeg| & \\
+\end{tabular}
+\label{table:parameterlist}
+\caption{The list of \texttt{\emph{<parameter>}}s that may be used by the \texttt{setparameter} and \texttt{fitparameter} commands.}
+\end{table}
+
+\begin{table}
+\begin{tabular}{ll|c c c c c}
+\texttt{\emph{<parameter>}} & Factor & Iso & Cub & Tet & Cyl & Hex \\
+\hline
+ \verb|lambdaA0| & $\lambda^{\alpha,0}$    & X & X & X & X \\
+ \verb|lambdaG2| & $\lambda^{\gamma,2}$    & X & X & X &   \\
+ \verb|lambdaE2| & $\lambda^{\epsilon,2}$  &   & X & X &   \\
+ \verb|lambdaD2| & $\lambda^{\delta,2}$    &   &   & X & X \\
+ \verb|lambda1A2| & $\lambda_1^{\alpha,2}$ &   &   &   & X \\
+ \verb|lambda1G2| & $\lambda_1^{\gamma,2}$ &   &   &   & X \\
+ \verb|lambda2G2| & $\lambda_2^{\gamma,2}$ &   &   &   & X \\
+ \verb|lambda3G2| & $\lambda_3^{\gamma,2}$ &   &   &   &   \\
+ \verb|lambda4G2| & $\lambda_4^{\gamma,2}$ &   &   &   &   \\
+\end{tabular}
+\label{table:symmetry}
+\caption{The tensor coefficients currently handled by \dexa. Each coefficient is only valid for the crystal symmetries marked with an `X'. Some symmetries have yet to be implemented and so are absent from this list.}
+\end{table}
+
+
+\subsection{\texttt{preforientation}}
+Syntax:
+\begin{quote}
+  \texttt{preforientation \emph{<$\theta_1$> <$\theta_2$> <$\theta_3$> <degree>}}
+\end{quote}
+Defines a preferential orientation for the crystal or crystallites in the sample during the time of the experiment.
+
+For a single crystal, one \verb|preforientation| should be given, with a \texttt{\emph{<degree>}} of $1$, to orientate the crystal correctly with respect to the beamline frame. \verb|numavesteps| should then be set to 1 to prevent the crystal being rotated about this axis to average multiple contributions, as would be necessary for a polycrystalline sample.
+
+By default, there no preferential orientations are defined.
+
+\subsection{\texttt{savespectrum}}
+Syntax:
+\begin{quote}
+  \texttt{savespectrum \emph{<file>}}
+\end{quote}
+Saves the theory spectrum, to \texttt{\emph{<file>}}, generated from the current parameter values. If \texttt{\emph{<file>}} already exists, it will be overwritten. Calling \verb|savespectrum| just before \verb|startfit| will save the first guess, used at the start of the optimisation process, and calling it just after will save the optimised result.
+
+\subsection{\texttt{saveexperiment}}
+Syntax:
+\begin{quote}
+  \texttt{saveexperiment \emph{<file>}}
+\end{quote}
+Saves the expermental spectrum to the file specified by \texttt{\emph{<file>}}. If \texttt{\emph{<file>}} already exists, it will be overwritten. \texttt{\emph{<file>}} should therefore not be the same file name from which the raw experimental data was loaded! This command can be useful if some pre-processing has been performed on the experimental data, such as Fourier filtering it with the \verb|filter| command.
+
+\subsection{\texttt{symmetry}}
+Syntax:
+\begin{quote}
+  \texttt{symmetry \emph{<symmetry>}}
+\end{quote}
+Specifies the symmetry class of the crystal under study. This will then define which, and how many, tensor coefficients are needed in order to fully describe the crystal property observed in the DiffXAS measurement. The list of possible values for \texttt{\emph{<symmetry>}} are shown in table \ref{table:symmetry}, along with their associated coefficients. Any coefficients not needed within the specified crystal symmetry will be completely ignored by \dexa. The default symmetry is \verb|cubic|.
+
+
+\subsection{\texttt{filter}}
+Syntax:
+\begin{quote}
+  \texttt{filter \emph{<kmin> <kmax> <dk> <rmin> <rmax> <dr>}}
+\end{quote}
+Fourier filters the experimental spectrum using a Hann window. This command can only be called after \verb|spectrum|. The back-transformed (q-space) spectrum will replace the original k-space spectrum in \dexa's spectrum object, causing the DiffXAS fit to take place in q- rather than k-space.
+
+\texttt{\emph{<kmin>}},\texttt{\emph{<kmax>}}, and \texttt{\emph{<dk>}} respectively define the lower and upper limits of the original k-space data to transform, and the width of the transition region of the Hann window. All data outside the region $k_{min} - \Delta k \le k \le k_{max} + \Delta k$ will be discarded; all data in the range $k_{min} + \Delta k < k < k_{max} - \Delta k$ preserved; and the data in the two intermediate regions, $k_{min} \pm \Delta k$ and $k_{max} \pm \Delta k$, modified according to:
+
+\begin{equation}
+k
+\end{equation}
+
+The similar applies for \texttt{\emph{<rmin>}},\texttt{\emph{<rmax>}}, and \texttt{\emph{<dr>}}, when back-transforming the data from R- to filtered q-space.
+
+\end{document}

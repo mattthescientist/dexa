@@ -1,0 +1,25 @@
+Version 1.0.1:
+* Fixed low-k sample rate in Resample.cpp, resample().
+* Improved handling of paths.dat header such that it can tell the difference 
+  between files from FEFF6 or FEFF8.
+* Added pseudo copy constructor to MgstSpectrum to remove multiple loading of
+  experimental spectra when using more than one sub-structure.
+* Fixed resampling problem in DiffXasSpectrum::loadSigmaSqr().
+* Reduced MAX_RADIUS to 20. It was previously 40.
+* Fixed termination condition in DEXA Minuit so that fit minima are correctly
+  identified. Achieved by adding setErrorDef(1.0) to startfit().
+* Reduced Minuit fitting strategy from 2 to 0. Extra precision provided by the 
+  higher level was only fitting noise.
+* Fixed #define MF_MGST_FCN_H in MgstFcnMinuit.h. There was a typo.
+* Fixed low-k sample rate in Resample.cpp, processNoise().
+* Fixed truction of sigma^2 in DiffXasSpectrum::setFilter().
+* Added verbose command line option to control the output level.
+* Added better help on the command line
+* Added output of version number at start of program execution.
+* Modified Makefile so that only DEXA Minuit is compiled by default.
+* Modified binary filenames in Makefile. DexaMinuit is now dexa and DexaGsl is
+  now dexa_gsl.
+* General code cleanups and additional commenting.
+
+Version 1.0:
+* First release
