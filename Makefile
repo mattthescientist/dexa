@@ -42,7 +42,7 @@ BIN_GSL := dexa_gsl
 BIN_MIN := dexa
 
 # Source files: COM common, GSL Gsl only, MIN Minuit only
-_OBJ_COM := Fourier.o DiffXasSpectrum.o MgstTensor.o PathFinder.o MgstSpectrum.o ScriptReader.o ScriptEventsGeneral.o
+_OBJ_COM := Fourier.o DiffXasSpectrum.o PathFinder.o ThermalSpectrum.o ScriptReader.o ScriptEventsGeneral.o
 _OBJ_GSL := ScriptEventsGsl.o MgstFcnGsl.o MgstFit.o
 _OBJ_MIN := ScriptEventsMinuit.o MgstFcnMinuit.o MgstFit.o
 
@@ -84,8 +84,8 @@ $(SRC_DIR)/DiffXasSpectrum.o: $(SRC_DIR)/DiffXasSpectrum.cpp \
   $(SRC_DIR)/DiffXasSpectrum.h $(SRC_DIR)/Resample.cpp $(SRC_DIR)/Fourier.cpp
 	$(CC) -c -o $(SRC_DIR)/DiffXasSpectrum.o $(SRC_DIR)/DiffXasSpectrum.cpp $(C_FLAGS)
   
-$(SRC_DIR)/MgstSpectrum.o: $(SRC_DIR)/MgstSpectrum.cpp $(SRC_DIR)/MgstSpectrum.h \
-  $(SRC_DIR)/DiffXasSpectrum.o $(SRC_DIR)/MgstTensor.o $(SRC_DIR)/PathFinder.o
+$(SRC_DIR)/ThermalSpectrum.o: $(SRC_DIR)/ThermalSpectrum.cpp $(SRC_DIR)/ThermalSpectrum.h \
+  $(SRC_DIR)/DiffXasSpectrum.o $(SRC_DIR)/PathFinder.o
 	$(CC) -c -o $@ $< $(C_FLAGS)                
 
 $(SRC_DIR)/ScriptEventsGeneral.o: $(SRC_DIR)/ScriptEventsGeneral.cpp $(SRC_DIR)/ScriptReader.h

@@ -1,5 +1,5 @@
 // MgstFcnMinuit.h
-// Copyright (C) 2007-2009 Matthew Ruffoni
+// Copyright (C) 2007-2009, 2014 Matthew Ruffoni
 //
 // This file is part of DEXA.
 //
@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <iostream>
-#include "MgstSpectrum.h"
+#include "ThermalSpectrum.h"
 #include "Minuit/FCNBase.h"
 #include "ScriptReader.h"
 
@@ -35,7 +35,7 @@ using namespace::std;
 class MgstFcn : public FCNBase {
 
 public:
-  MgstFcn (vector <struct spectrum> *Spectra) { 
+  MgstFcn (vector <struct spectrum> *Spectra) {
     theSpectra = Spectra; MaxIterations = DEF_MAX_ITERATIONS; 
     VerboseLevel = MIN_VERBOSE; theErrorDef = 0.0;
   }

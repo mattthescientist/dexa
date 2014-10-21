@@ -93,7 +93,7 @@ int saveparams (stringstream &args, vector<struct spectrum> &Spectra) {
 // towards the machine, +y is up, and +z is along the direction of beam 
 // propogation.
 //
-int preforientation (stringstream &args, vector<struct spectrum> &Spectra) {
+/*int preforientation (stringstream &args, vector<struct spectrum> &Spectra) {
   string ExpSpectrum, SpectrumName;
   double x, y, z, Degree;
   int err, Verbose;
@@ -118,7 +118,7 @@ int preforientation (stringstream &args, vector<struct spectrum> &Spectra) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
 
 //------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ int preforientation (stringstream &args, vector<struct spectrum> &Spectra) {
 // to the beamline frame i.e. +x is horizontally towards the machine, +y is up, 
 // and +z is along the direction of beam propogation.
 //
-int magnetisation (stringstream &args, vector<struct spectrum> &Spectra) {
+/*int magnetisation (stringstream &args, vector<struct spectrum> &Spectra) {
   string ExpSpectrum, SpectrumName;
   double x1, y1, z1, x2 ,y2 ,z2;
   int err, Verbose;
@@ -155,7 +155,7 @@ int magnetisation (stringstream &args, vector<struct spectrum> &Spectra) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
 
 //------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ int magnetisation (stringstream &args, vector<struct spectrum> &Spectra) {
 // direction with respect to the beamline frame i.e. +x is horizontally towards 
 // the machine, +y is up, and +z is along the direction of beam propogation.
 //
-int polarisation (stringstream &args, vector<struct spectrum> &Spectra) {
+/*int polarisation (stringstream &args, vector<struct spectrum> &Spectra) {
   double x, y, z;
   int err, Verbose;
   
@@ -186,7 +186,7 @@ int polarisation (stringstream &args, vector<struct spectrum> &Spectra) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
 
 //------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ int polarisation (stringstream &args, vector<struct spectrum> &Spectra) {
 // function is not needed in the tensor-free version of the code and is
 // therefore omitted by the compiler preporocessor.
 //
-int numavesteps (stringstream &args, vector<struct spectrum> &Spectra) {
+/*int numavesteps (stringstream &args, vector<struct spectrum> &Spectra) {
   int Steps, err, Verbose;
   
   args >> Steps >> Verbose;
@@ -222,7 +222,7 @@ int numavesteps (stringstream &args, vector<struct spectrum> &Spectra) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
 
 
@@ -720,6 +720,11 @@ double createParameterArrays (vector<double> &UserParams, vector<double>
         }
         if (Spectra[i].SubStructure[l].Path[j].Index == -1) {
           Spectra[i].SubStructure[l].Path[j].Index = UserParams.size ();
+          if (Verbose >= MAX_VERBOSE) {
+			cout << "Adding " << Spectra[i].SubStructure[l].Path[j].Name
+			  << ": " << "Spectrum=" << i << " Struct=" << l << " Path=" << j
+			  << endl;
+		  }
           ParamNames.push_back (Spectra[i].SubStructure[l].Path[j].Name);  
           MinusLimits.push_back (Spectra[i].SubStructure[l].Path[j].MinusLimit);
           PlusLimits.push_back (Spectra[i].SubStructure[l].Path[j].PlusLimit);
@@ -753,7 +758,7 @@ int addpath (stringstream &args, structure &Structure) {
   args >> Chipfile >> Header >> SpectrumName >> Verbose;
   if (args.eof ()) {
     Err = Structure.Spectrum.addPath (Chipfile.c_str(), Header);
-    if (Err == MS_NO_ERROR) {
+    if (Err == TH_NO_ERROR) {
       if (Verbose >= MIN_VERBOSE)
         cout << "Added " << Chipfile << " to " << SpectrumName << endl;
       return SCRIPT_NO_ERROR;
@@ -778,7 +783,7 @@ int updatepath (stringstream &args, structure &Structure) {
   if (args.eof ()) {
     Err = Structure.Spectrum.updatePath 
       (Chipfile.c_str(), Property.c_str(), Value);
-    if (Err == MS_NO_ERROR) {
+    if (Err == TH_NO_ERROR) {
       if (Verbose >= MIN_VERBOSE)
         cout << SpectrumName << "." 
         << Chipfile << "." << Property << " = " << Value << endl;
@@ -836,7 +841,7 @@ int setparameter (stringstream &args, structure &Structure) {
 
     // Examine the parameter get function error code and return the 
     // appropriate scripte error code.
-    if (Err == MS_NO_ERROR) {
+    if (Err == TH_NO_ERROR) {
       if (Verbose >= MIN_VERBOSE) {
         cout << SpectrumName << "." << Parameter;
         if (Path >= 0) cout << " (" << Path << ")";
@@ -955,7 +960,7 @@ int fitparameter (stringstream &args, structure &Structure) {
 
 
 
-int fitfulltensor (stringstream &args, structure &Structure) {
+/*int fitfulltensor (stringstream &args, structure &Structure) {
   string SpectrumName;
   int Verbose;
   
@@ -977,9 +982,9 @@ int fitfulltensor (stringstream &args, structure &Structure) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
-int fitfullvoigt (stringstream &args, structure &Structure) {
+/*int fitfullvoigt (stringstream &args, structure &Structure) {
   string SpectrumName;
   int Verbose;
   
@@ -1000,7 +1005,7 @@ int fitfullvoigt (stringstream &args, structure &Structure) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/
 
 
 /*int fithalfvoigt (stringstream &args, structure &Structure) {
@@ -1061,7 +1066,7 @@ int fitfullvoigt (stringstream &args, structure &Structure) {
 
 
 
-int symmetry (stringstream &args, structure &Structure) {
+/*int symmetry (stringstream &args, structure &Structure) {
   string Symmetry, SpectrumName;
   int Verbose;
   
@@ -1091,4 +1096,4 @@ int symmetry (stringstream &args, structure &Structure) {
     return SCRIPT_NO_ERROR;
   }
   return SCRIPT_BAD_ARGS;
-}
+}*/

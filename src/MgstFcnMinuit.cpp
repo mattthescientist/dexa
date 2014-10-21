@@ -43,7 +43,7 @@ double MgstFcn::operator() (const vector<double> &par) const {
   
   
   // Use the Index property of each fit parameter in theSpectra to apply the new
-  // parameter values to the actal MgstSpectrum objects. 
+  // parameter values to the actual MgstSpectrum objects.
   for (unsigned int i = 0; i < theSpectra -> size (); i ++) {
     for (unsigned int k = 0; k < theSpectra -> at(i).SubStructure.size (); k ++) {
 
@@ -77,8 +77,9 @@ double MgstFcn::operator() (const vector<double> &par) const {
       if (theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) != 0.0) {
         Chi2 += pow(TheoryPoint - theDiffEXAFS[j].y, 2);
         Chi2W += pow(TheoryPoint - theDiffEXAFS[j].y, 2) 
-          / theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j);
-//        if (Iteration == 1) cout << theDiffEXAFS[j].x << "  " << theDiffEXAFS[j].y << "  " << theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) << "  " << Chi2W << endl;
+          // / theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j);
+		/ 1.0e-8;
+        //cout << theDiffEXAFS[j].x << "  " << theDiffEXAFS[j].y << "  " << theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) << "  " << Chi2W << endl;
       }
     }
   }

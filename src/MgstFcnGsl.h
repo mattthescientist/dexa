@@ -21,7 +21,7 @@
 
 #define DEF_MAX_ITERATIONS 250
 
-#include "MgstSpectrum.h"
+#include "ThermalSpectrum.h"
 #include <vector>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
@@ -55,18 +55,18 @@ private:
 };
 
 struct dataCrystal { 
-  vector<MgstSpectrum*> theSpectrum; 
-  int (MgstSpectrum::*ParamSet)(double);
-  double (MgstSpectrum::*ParamGet)();
+  vector<ThermalSpectrum*> theSpectrum;
+  int (ThermalSpectrum::*ParamSet)(double);
+  double (ThermalSpectrum::*ParamGet)();
   double x;
   unsigned int CurrentSpectrum;
   int MSIndex;
 };
 
 struct dataPath { 
-  vector<MgstSpectrum*> theSpectrum; 
-  int (MgstSpectrum::*ParamSet)(int, double);
-  double (MgstSpectrum::*ParamGet)(int);
+  vector<ThermalSpectrum*> theSpectrum;
+  int (ThermalSpectrum::*ParamSet)(int, double);
+  double (ThermalSpectrum::*ParamGet)(int);
   double x;
   unsigned int CurrentSpectrum;
   int PathNumber;
@@ -74,15 +74,15 @@ struct dataPath {
 
 
 /*struct crystal_data_struct { 
-  MgstSpectrum *theSpectrum; 
-  int (MgstSpectrum::*ParamSet)(double);
-  double (MgstSpectrum::*ParamGet)();
+  ThermalSpectrum *theSpectrum;
+  int (ThermalSpectrum::*ParamSet)(double);
+  double (ThermalSpectrum::*ParamGet)();
 };
 
 struct path_data_struct { 
-  MgstSpectrum *theSpectrum; 
-  int (MgstSpectrum::*ParamSet)(int, double);
-  double (MgstSpectrum::*ParamGet)(int);
+  ThermalSpectrum *theSpectrum;
+  int (ThermalSpectrum::*ParamSet)(int, double);
+  double (ThermalSpectrum::*ParamGet)(int);
   int PathNumber;
 };*/
 

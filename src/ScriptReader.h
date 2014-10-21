@@ -20,7 +20,7 @@
 #define SCRIPT_READER_H
 
 #include <string>
-#include "MgstSpectrum.h"
+#include "ThermalSpectrum.h"
 
 using namespace::std;
 
@@ -55,7 +55,7 @@ using namespace::std;
 #define ERR_VERBOSE -1
 
 // The following structs, pathParam and crystalParam, store the information
-// required to manipulate the fit parameters in a MgstSpectrum. Both contain two
+// required to manipulate the fit parameters in a ThermalSpectrum. Both contain two
 // function pointers, which are refer to the parameter's get and set functions, 
 // and a name for the parameter. When a parameter with a matching name is 
 // identified in the input script, the function pointers are copied from the
@@ -76,8 +76,8 @@ using namespace::std;
 // the path upon which the parameter acts.
 //
 struct pathParam {
-  double (MgstSpectrum::*ParamGet) (int);
-  int (MgstSpectrum::*ParamSet) (int, double);
+  double (ThermalSpectrum::*ParamGet) (int);
+  int (ThermalSpectrum::*ParamSet) (int, double);
   string Name;
   int PathNum;
   int Index;
@@ -87,8 +87,8 @@ struct pathParam {
 };
 
 struct crystalParam {
-  double (MgstSpectrum::*ParamGet) ();
-  int (MgstSpectrum::*ParamSet) (double);
+  double (ThermalSpectrum::*ParamGet) ();
+  int (ThermalSpectrum::*ParamSet) (double);
   string Name;
   int Index;
   double PlusLimit, MinusLimit;
@@ -99,13 +99,13 @@ struct crystalParam {
 // When a new spectrum is created in the input script, a struct Spectrum object
 // is created and stored in the "vector <struct spectrum> Spectra" vector that
 // is passed to all the command handlers defined below. The struct creates a
-// MgstSpectrum object (i.e. the actual spectrum itself), and two vectors for
+// ThermalSpectrum object (i.e. the actual spectrum itself), and two vectors for
 // the associated fit parameters: Crystal for parameters derived from 
 // crystalParams, which act on the crystal as a whole, and Path for parameters
 // derived from pathParam, that act on single scattering paths only.
 //
 typedef struct td_structure {
-  MgstSpectrum Spectrum;
+  ThermalSpectrum Spectrum;
   vector <struct crystalParam> Crystal;
   vector <struct pathParam> Path;
   string Name;
@@ -124,14 +124,14 @@ struct spectrum {
 
 struct parameter {
   string Name;
-  double (MgstSpectrum::*FnGet) ();
-  int (MgstSpectrum::*FnSet) (double);
-  double (MgstSpectrum::*FnPathGet) (int);
-  int (MgstSpectrum::*FnPathSet) (int, double);
+  double (ThermalSpectrum::*FnGet) ();
+  int (ThermalSpectrum::*FnSet) (double);
+  double (ThermalSpectrum::*FnPathGet) (int);
+  int (ThermalSpectrum::*FnPathSet) (int, double);
   
   static parameter add (string NewName, 
-    double (MgstSpectrum::*NewFnGet) (), 
-    int (MgstSpectrum::*NewFnSet) (double)) {
+    double (ThermalSpectrum::*NewFnGet) (),
+    int (ThermalSpectrum::*NewFnSet) (double)) {
     parameter NewParameter;
     NewParameter.Name = NewName;
     NewParameter.FnGet = NewFnGet; NewParameter.FnPathGet = NULL;
@@ -140,8 +140,8 @@ struct parameter {
   }
   
   static parameter addPath (string NewName, 
-    double (MgstSpectrum::*NewFnPathGet) (int), 
-    int (MgstSpectrum::*NewFnPathSet) (int, double)) {
+    double (ThermalSpectrum::*NewFnPathGet) (int),
+    int (ThermalSpectrum::*NewFnPathSet) (int, double)) {
     parameter NewParameter;
     NewParameter.Name = NewName;
     NewParameter.FnPathGet = NewFnPathGet; NewParameter.FnGet = NULL;
@@ -241,11 +241,11 @@ int fitfullvoigt (stringstream &args, structure &Structure);
 const struct command_global GlobalCommands [] = {
   command_global::add ("create",          &create),
   command_global::add ("startfit",        &startfit),
-  command_global::add ("saveparams",      &saveparams),  
+  command_global::add ("saveparams",      &saveparams)/*,
   command_global::add ("preforientation", &preforientation),
   command_global::add ("magnetisation",   &magnetisation),
   command_global::add ("polarisation",    &polarisation),
-  command_global::add ("numavesteps",     &numavesteps)
+  command_global::add ("numavesteps",     &numavesteps)*/
 };
 
 const struct command_spectrum SpectrumCommands [] = {
@@ -264,10 +264,10 @@ const struct command_structure StructureCommands [] = {
   command_structure::add ("addpath",         &addpath),
   command_structure::add ("updatepath",      &updatepath),
   command_structure::add ("setparameter",    &setparameter),
-  command_structure::add ("fitparameter",    &fitparameter),
+  command_structure::add ("fitparameter",    &fitparameter)/*,
   command_structure::add ("symmetry",        &symmetry),
   command_structure::add ("fitfulltensor",   &fitfulltensor),
-  command_structure::add ("fitfullvoigt",    &fitfullvoigt)
+  command_structure::add ("fitfullvoigt",    &fitfullvoigt)*/
 };
 
 
@@ -282,23 +282,9 @@ const struct command_structure StructureCommands [] = {
 // input script i.e. does it have a path number as well as a parameter value, or
 // just a parameter value?
 const struct parameter Parameters [] = {
-  parameter::add ("lambdaA0", &MgstSpectrum::lambdaA0, &MgstSpectrum::lambdaA0),
-  parameter::add ("lambdaG2", &MgstSpectrum::lambdaG2, &MgstSpectrum::lambdaG2),
-  parameter::add ("lambdaE2", &MgstSpectrum::lambdaE2, &MgstSpectrum::lambdaE2),
-  parameter::add ("lambdaD2", &MgstSpectrum::lambdaD2, &MgstSpectrum::lambdaD2),
-  parameter::add ("lambda1A2", &MgstSpectrum::lambda1A2,&MgstSpectrum::lambda1A2),
-  parameter::add ("lambda1G2", &MgstSpectrum::lambda1G2,&MgstSpectrum::lambda1G2),
-  parameter::add ("lambda2G2", &MgstSpectrum::lambda2G2,&MgstSpectrum::lambda2G2),
-  parameter::add ("lambda3G2", &MgstSpectrum::lambda3G2,&MgstSpectrum::lambda3G2),
-  parameter::add ("lambda4G2", &MgstSpectrum::lambda4G2,&MgstSpectrum::lambda4G2),
-  parameter::add ("dE",       &MgstSpectrum::dE,       &MgstSpectrum::dE),
-  parameter::addPath ("dSig2j", &MgstSpectrum::dSig2,  &MgstSpectrum::dSig2),
-  parameter::addPath ("dS", &MgstSpectrum::DS,      &MgstSpectrum::DS),
-  parameter::addPath ("prefX",  &MgstSpectrum::prefX,  &MgstSpectrum::prefX),
-  parameter::addPath ("prefY",  &MgstSpectrum::prefY,  &MgstSpectrum::prefY),
-  parameter::addPath ("prefZ",  &MgstSpectrum::prefZ,  &MgstSpectrum::prefZ),
-  parameter::addPath ("prefDeg",&MgstSpectrum::prefDeg,&MgstSpectrum::prefDeg),
-  parameter::addPath ("halfVoigt", &MgstSpectrum::halfVoigtElement, &MgstSpectrum::halfVoigtElement)
+  parameter::add ("dE",       &ThermalSpectrum::dE,       &ThermalSpectrum::dE),
+  parameter::addPath ("dSig2j", &ThermalSpectrum::dSig2,  &ThermalSpectrum::dSig2),
+  parameter::addPath ("dS", &ThermalSpectrum::dS,      &ThermalSpectrum::dS)
 };
 
 

@@ -111,6 +111,17 @@ int DiffXasSpectrum::dSig2 (int Shell, double NewdSig2) {
 	}
 }
 
+int DiffXasSpectrum::dS (int path, double NewValue) {
+	if (path < (int)ScatteringPaths.size()) {
+		ScatteringPaths[path].dS = NewValue; SpectrumReady = false;
+		return 0;
+	} else {
+		cout << "Error: The path index for dSig2 must be between 0 and "
+				  << ScatteringPaths.size () << ", but you specified " << path << endl;
+		return 1;
+	}
+}
+
 
 //******************************************************************************
 // EXPERIMENT SECTION : Load spectrum, Save spectrum

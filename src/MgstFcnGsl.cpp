@@ -49,7 +49,7 @@ int fitFunction (const gsl_vector *par, void *data, gsl_vector *f)
   vector<struct spectrum> *theSpectra = ((vector<struct spectrum> *) data);
 
   // Use the Index property of each fit parameter in theSpectra to apply the new
-  // parameter values to the actal MgstSpectrum objects. 
+  // parameter values to the actal ThermalSpectrum objects.
   for (unsigned int i = 0; i < theSpectra -> size (); i ++) {
     for (unsigned int k = 0; k < theSpectra -> at(i).SubStructure.size (); k ++) {
   
@@ -130,7 +130,7 @@ int derivativeFunction (const gsl_vector *Arguments, void *data, gsl_matrix *J)
     }
   }
   
-  vector<MgstSpectrum> derivSpectra;
+  vector<ThermalSpectrum> derivSpectra;
   
   // Calculate the derivative of each spectrum i with respect to each parameter 
   // k at each spectrum data point j
@@ -203,7 +203,7 @@ int derivativeFunction (const gsl_vector *Arguments, void *data, gsl_matrix *J)
     }
   }
   
-  vector<MgstSpectrum> derivSpectra;
+  vector<ThermalSpectrum> derivSpectra;
 
   x.push_back(0.0);
   
@@ -266,7 +266,7 @@ int derivativeFunction (const gsl_vector *Arguments, void *data, gsl_matrix *J)
     }
   }
   
-  vector<MgstSpectrum> derivSpectra;
+  vector<ThermalSpectrum> derivSpectra;
   
   // Calculate the derivative of each spectrum i with respect to each parameter 
   // k at each spectrum data point j
@@ -340,7 +340,7 @@ int fitAndDerivativeFunctions (
 //
 double dChiCrystal (double Step, void * data) 
 {
-  vector<MgstSpectrum*> theSpectra = ((struct dataCrystal *) data) -> theSpectrum;
+  vector<ThermalSpectrum*> theSpectra = ((struct dataCrystal *) data) -> theSpectrum;
   unsigned int i = ((struct dataCrystal *) data) -> CurrentSpectrum;
   double x = ((struct dataCrystal *) data) -> x;
   double RtnVal = 0.0;
@@ -357,7 +357,7 @@ double dChiCrystal (double Step, void * data)
 
 double dChiPath (double Step, void * data) 
 {
-  vector<MgstSpectrum*> theSpectra = ((struct dataPath *) data) -> theSpectrum;
+  vector<ThermalSpectrum*> theSpectra = ((struct dataPath *) data) -> theSpectrum;
   unsigned int i = ((struct dataPath *) data) -> CurrentSpectrum;
   double x = ((struct dataPath *) data) -> x;
   int PathNumber = ((struct dataPath *) data) -> PathNumber;
@@ -378,7 +378,7 @@ double dChiPath (double Step, void * data)
 
 /*vector<double> dChiCrystal (double Step, vector<double> x, void * data) 
 {
-  MgstSpectrum *theSpectrum = ((crystal_data *) data) -> theSpectrum;
+  ThermalSpectrum *theSpectrum = ((crystal_data *) data) -> theSpectrum;
   vector<double> RtnVals;
 
   (theSpectrum ->* ((crystal_data *) data) -> ParamSet) 
@@ -396,7 +396,7 @@ double dChiPath (double Step, void * data)
 
 vector<double> dChiPath (double Step, vector<double> x, void * data) 
 {
-  MgstSpectrum *theSpectrum = ((path_data *) data) -> theSpectrum;
+  ThermalSpectrum *theSpectrum = ((path_data *) data) -> theSpectrum;
   vector<double> RtnVals;
   int PathNumber = ((path_data *) data) -> PathNumber;
 
@@ -416,7 +416,7 @@ vector<double> dChiPath (double Step, vector<double> x, void * data)
 // scaled Levenberg-Marquardt solver to optimise them.
 //
 // Only an error code is returned, and the original Guess vector is untouched. 
-// The fit results are available in the MgstSpectrum object that was passed by 
+// The fit results are available in the ThermalSpectrum object that was passed by
 // ref to MgstFcn in its constructor. i.e. that spectrum has been optimised.
 //
 int MgstFcn::operator() (vector<double> &Guess) 
