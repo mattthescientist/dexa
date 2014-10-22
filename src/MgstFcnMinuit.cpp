@@ -76,16 +76,17 @@ double MgstFcn::operator() (const vector<double> &par) const {
       }
       if (theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) != 0.0) {
         Chi2 += pow(TheoryPoint - theDiffEXAFS[j].y, 2);
-        Chi2W += pow(TheoryPoint - theDiffEXAFS[j].y, 2) 
+        Chi2W += pow(TheoryPoint - theDiffEXAFS[j].y, 2)
+        // TODO: Remove the dirty hack for the noise normalisation in MgstFcnMinuit.cpp
           // / theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j);
-		/ 1.0e-8;
+		/ 1.0e-9;
         //cout << theDiffEXAFS[j].x << "  " << theDiffEXAFS[j].y << "  " << theSpectra -> at(i).SubStructure[0].Spectrum.sigmaSqr(j) << "  " << Chi2W << endl;
       }
     }
   }
 
   if (VerboseLevel >= MAX_VERBOSE) {
-    cout.precision (10);
+    cout.precision (8);
     cout << Iteration << scientific;  
     for (unsigned int i = 0; i < par.size (); i ++) {
       cout << "  " << par [i];

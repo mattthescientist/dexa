@@ -134,6 +134,7 @@ int startfit(stringstream &args, vector<struct spectrum> &Spectra){
   cout << "Starting DiffXAS fit with Minuit ..." << flush;
   MnMigrad MiGrad (theFcn, Parameters, Strategy);
   theFcn.setErrorDef(MINUIT_ERR_DEF);
+  theFcn.setVerbose (Verbose);
   FunctionMinimum min = MiGrad ();
   applyOptimisedParameters (min, Spectra);
   cout << " done" << endl;

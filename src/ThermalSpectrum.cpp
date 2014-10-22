@@ -103,8 +103,8 @@ vector <Coordinate> ThermalSpectrum::doDChiCalculation (vector <Path> paths, vec
 //
 // Note two things: Firstly, the calculation of dChi works with the half path
 // length Rj rather than the full length Sj, despite the fact that all the
-// magnetostrictive strains are calculated for the latter. This is simply to
-// make it easier to implement the EXAFS function from Eq.(3) of M. Newville,
+// thermal strains are calculated for the latter. This is simply to make it
+// easier to implement the EXAFS function from Eq.(3) of M. Newville,
 // J. Synchrotron Radiat. 8, 96, which gives Chi(k) for Rj. Rj is simply (1/2)Sj
 //
 // Secondly, the calculation of dChi does not implement the Taylor series form
@@ -168,7 +168,7 @@ Coordinate ThermalSpectrum::doDChiCalculation1 (vector <Path> paths, double kIn)
       //
       double Rj  = S * 0.5;
       double dRj = paths[j].dR;
-      double dSj = paths[j].dS * (S + 2.0 * dRj);
+      double dSj = paths[j].dS /** (S + 2.0 * dRj)*/;
       double dSig2j = paths[j].dSig2;
       double Dj  =
 		  A * pow (Rj, 2) * exp (

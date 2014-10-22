@@ -157,7 +157,9 @@ int readScript (const char* Filename, vector <struct spectrum> &Spectra, int Ver
     // Get the next line of data and load it into an istringstream for formatted
     // output later on.
     getline (ScriptStream, LineOfData);
-    cout << LineOfData << endl;
+    if (Verbose >= MAX_VERBOSE) {
+    	cout << LineOfData << endl;
+    }
     LineNumber ++;
     iss.clear ();
     iss.str (LineOfData);

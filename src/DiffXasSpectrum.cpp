@@ -540,15 +540,9 @@ int DiffXasSpectrum::saveTheory (const char *Filename, vector<Coordinate> &DiffX
     oss.clear (); oss.str ("");
     oss << Filename << PATH_R_SUFFIX;
     writeTheoryData (oss.str(), AllRData);
-    
-    // Save the Q-space data
-//    oss.clear (); oss.str ("");
-//    oss << Filename << PATH_Q_SUFFIX;
-//    writeTheoryData (oss.str(), AllQData);
-  } else {
-    // If we're not using the Fourier Filter, just save the QData without suffix
-    writeTheoryData (Filename, AllQData);
   }
+  // Save the Q-space data (which is the K-space data if no Fourier filter was applied)
+  writeTheoryData (Filename, AllQData);
   return DX_NO_ERROR;
 }
 
